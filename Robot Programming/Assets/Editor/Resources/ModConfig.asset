@@ -16,7 +16,8 @@ MonoBehaviour:
   author: Red Penguin
   description: "--\nEvery kids fantasy job is now your adult nightmare. Just try not
     to \u2018crash\u2019 the program.\n\nModule Name: Robot Programming\nModule ID:
-    robotProgramming\nAuthor: Red Penguin\nIdea creator & playtester: TurnedTrove100\n--"
+    robotProgramming\nAuthor: Red Penguin\nIdea creator : MarioXTurn\nPlaytesters:
+    Danny7007, MarioXTurn, XMaster, Shaun/Sean\n\nManual: https://ktane.timwi.de/HTML/Robot%20Programming.html\n--"
   version: 1
   outputFolder: build
   previewImage: {fileID: 2800000, guid: ce1ecaf3effdc00439e2a6d6f398c2a7, type: 3}

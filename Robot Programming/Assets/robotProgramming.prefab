@@ -988,7 +988,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1841850223416770}
   m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -0.0335, y: 0.0152, z: -0.0148}
+  m_LocalPosition: {x: -0.0335, y: 0.0152, z: -0.035}
   m_LocalScale: {x: 0.01, y: 0.0100000035, z: 0.0100000035}
   m_Children: []
   m_Father: {fileID: 4202684274489892}
@@ -1001,7 +1001,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1904564846034402}
   m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -0.0335, y: 0.0152, z: 0.0495}
+  m_LocalPosition: {x: -0.0335, y: 0.0152, z: 0.01}
   m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
   m_Children: []
   m_Father: {fileID: 4202684274489892}
@@ -1086,7 +1086,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1992244385765952}
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0.027750004, y: 0.019249998, z: 0.0425}
+  m_LocalPosition: {x: -0.02, y: 0.019249998, z: 0.066}
   m_LocalScale: {x: 0.0103124995, y: 0.010312515, z: 0.010312515}
   m_Children:
   - {fileID: 4818540267663566}
@@ -1101,7 +1101,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1349181246363758}
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0.027750004, y: 0.019249998, z: 0.065225}
+  m_LocalPosition: {x: -0.0475, y: 0.019249998, z: 0.066}
   m_LocalScale: {x: 0.0103124995, y: 0.010312515, z: 0.010312515}
   m_Children:
   - {fileID: 4071652302523718}
@@ -3167,6 +3167,7 @@ MonoBehaviour:
   - -0.0435
   - -0.0235
   - -0.0036
+  startingCoords: 40000000420000004400000046000000
   TwitchHelpMessage: Use !{0} press left to press the left button. (Valid buttons
     are left, right, up, down). Use !{0} block blue/red/green/yellow to block that
     color. Use !{0} start to start the program. Use !{0} reset to reset the program.

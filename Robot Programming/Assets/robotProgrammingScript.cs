@@ -33,11 +33,15 @@ public class robotProgrammingScript : MonoBehaviour
     public AudioClip[] sounds;
 
     public float[] xPos;
+    public int[] startingCoords;
 
     private int index = 0;
     private int ledIndex = 0;
     private int whichRobotNum = 0;
     private int calcNum = 0;
+    private bool trackerActive = false; //this is for r2d2, forgot to name it and i'm honestly too tired rn to change it sorry
+    private bool fenderTrackActove = false;
+    private bool fenderFirstMove = true;
 
     private List<int> colorsTaken = new List<int>();
     private List<int> posTaken = new List<int>();
@@ -48,11 +52,14 @@ public class robotProgrammingScript : MonoBehaviour
 
     private List<int> movement = new List<int>();
     private List<int> colorMovement = new List<int>();
+    private List<int> pyshicalMovement = new List<int>();
     private List<int> coordinates = new List<int>();
     private List<string> pressedButtons = new List<string>();
 
     private bool r2d2movement = false;
     private int fenderMovement = 0;
+    private int r2d2tracker = 0;
+    private int fenderTracker = 0;
 
     private string maze;
     private List<string> tops = new List<string>();
@@ -156,116 +163,52 @@ public class robotProgrammingScript : MonoBehaviour
                        "XOXOOOOOX";
 
     //bottoms
-    private string B1 = "XXXOXXXOX" +
-                       "XOOOXOOOX" +
-                       "XXXOXXXXX" +
-                       "XOOOOOOOX" +
-                       "XOXOXXXOX" +
+    private string B1 ="XOXOXXXOX" +
                        "XOXOXOOOX" +
                        "XXXXXXXXX";
-    private string B2 = "XXXOXOXXX" +
-                       "XOOOXOOOX" +
-                       "XOXXXXXOX" +
-                       "XOOOOOOOX" +
-                       "XOXXXXXOX" +
+    private string B2 ="XOXXXXXOX" +
                        "XOOOOOOOX" +
                        "XXXXXXXXX";
-    private string B3 = "XOXXXOXXX" +
-                       "XOOOOOOOX" +
-                       "XOXXXXXXX" +
-                       "XOOOXOOOX" +
-                       "XOXOXXXOX" +
+    private string B3 ="XOXOXXXOX" +
                        "XOXOOOOOX" +
                        "XXXXXXXXX";
-    private string B4 = "XXXOXOXOX" +
-                       "XOOOXOXOX" +
-                       "XOXXXXXOX" +
-                       "XOXOOOOOX" +
-                       "XOXOXXXXX" +
+    private string B4 ="XOXOXXXXX" +
                        "XOOOOOOOX" +
                        "XXXXXXXXX";
-    private string B5 = "XOXOXXXXX" +
-                       "XOXOOOXOX" +
-                       "XOXXXOXOX" +
-                       "XOXOOOOOX" +
-                       "XOXOXXXXX" +
+    private string B5 ="XOXOXXXXX" +
                        "XOOOOOOOX" +
                        "XXXXXXXXX";
-    private string B6 = "XOXXXOXOX" +
-                       "XOXOOOXOX" +
-                       "XOXXXOXOX" +
-                       "XOXOOOOOX" +
-                       "XOXOXXXXX" +
+    private string B6 ="XOXOXXXXX" +
                        "XOOOOOOOX" +
                        "XXXXXXXXX";
-    private string B7 = "XXXOXXXOX" +
-                       "XOOOXOXOX" +
-                       "XOXXXOXOX" +
-                       "XOXOXOOOX" +
-                       "XOXOXOXXX" +
+    private string B7 ="XOXOXOXXX" +
                        "XOOOOOOOX" +
                        "XXXXXXXXX";
-    private string B8 = "XXXOXXXOX" +
-                       "XOOOOOXOX" +
-                       "XOXXXOXOX" +
-                       "XOXOXOXOX" +
-                       "XOXOXOXOX" +
+    private string B8 ="XOXOXOXOX" +
                        "XOOOXOOOX" +
                        "XXXXXXXXX";
-    private string B9 = "XOXXXOXOX" +
-                       "XOOOXOXOX" +
-                       "XOXXXOXXX" +
-                       "XOOOOOOOX" +
-                       "XOXOXXXOX" +
+    private string B9 ="XOXOXXXOX" +
                        "XOXOOOOOX" +
                        "XXXXXXXXX";
-    private string B10 = "XXXOXXXOX" +
-                       "XOOOOOOOX" +
-                       "XOXXXOXXX" +
-                       "XOOOOOOOX" +
-                       "XXXOXXXOX" +
+    private string B10 ="XXXOXXXOX" +
                        "XOOOOOOOX" +
                        "XXXXXXXXX";
-    private string B11 = "XXXOXOXOX" +
-                       "XOOOXOXOX" +
-                       "XOXXXXXOX" +
-                       "XOOOOOOOX" +
-                       "XOXXXOXXX" +
+    private string B11 ="XOXXXOXXX" +
                        "XOXOOOOOX" +
                        "XXXXXXXXX";
-    private string B12 = "XXXOXOXXX" +
-                       "XOOOXOOOX" +
-                       "XOXXXXXOX" +
-                       "XOXOOOXOX" +
-                       "XOXOXOXOX" +
+    private string B12 ="XOXOXOXOX" +
                        "XOOOXOOOX" +
                        "XXXXXXXXX";
-    private string B13 = "XOXXXOXOX" +
-                       "XOOOOOXOX" +
-                       "XXXOXOXXX" +
-                       "XOOOXOXOX" +
-                       "XOXXXOXOX" +
+    private string B13 ="XOXXXOXOX" +
                        "XOOOOOOOX" +
                        "XXXXXXXXX";
-    private string B14 = "XXXOXOXXX" +
-                       "XOXOXOOOX" +
-                       "XOXOXXXOX" +
-                       "XOOOXOOOX" +
-                       "XOXXXOXXX" +
+    private string B14 ="XOXXXOXXX" +
                        "XOOOOOOOX" +
                        "XXXXXXXXX";
-    private string B15 = "XOXOXXXOX" +
-                       "XOXOOOOOX" +
-                       "XOXXXOXXX" +
-                       "XOXOOOOOX" +
-                       "XOXOXXXOX" +
+    private string B15 ="XOXOXXXOX" +
                        "XOXOOOXOX" +
                        "XXXXXXXXX";
-    private string B16 = "XXXOXOXXX" +
-                       "XOOOOOOOX" +
-                       "XOXXXXXOX" +
-                       "XOXOOOXOX" +
-                       "XOXOXOXOX" +
+    private string B16 ="XOXOXOXOX" +
                        "XOOOXOOOX" +
                        "XXXXXXXXX";
 
@@ -286,6 +229,10 @@ public class robotProgrammingScript : MonoBehaviour
 
     void Start()
     {
+        coordinates.Add(64);
+        coordinates.Add(66);
+        coordinates.Add(68);
+        coordinates.Add(70);
         //intialization
         whichRobots.Add(0);
         whichRobots.Add(0);
@@ -335,19 +282,42 @@ public class robotProgrammingScript : MonoBehaviour
 
     void moduleStriked()
     {
-        r2d2movement = false;
-        fenderMovement = 0;
+        if (trackerActive == true)
+        {
+            if (r2d2tracker == 0)
+            {
+                r2d2movement = false;
+            }
+            else
+            {
+                if (r2d2tracker % 2 == 0)
+                {
+                    r2d2movement = false;
+                }
+                else
+                {
+                    r2d2movement = true;
+                }
+            }
+        }
+        else
+        {
+            r2d2movement = false;
+        }
+        if (fenderTrackActove == false)
+        {
+            fenderMovement = 0;
+        }
+        else
+        {
+            fenderMovement = fenderTracker;
+        }
         calcNum = 0;
         colorsBlocked.Clear();
         movement.Clear();
         colorMovement.Clear();
+        pyshicalMovement.Clear();
         pressedButtons.Clear();
-        coordinates.Clear();
-        coordinates.Add(100);
-        coordinates.Add(102);
-        coordinates.Add(104);
-        coordinates.Add(106);
-        //commandDisplay.text = "";
         return;
     }
 
@@ -389,6 +359,22 @@ public class robotProgrammingScript : MonoBehaviour
                 for (int i = 0; i < 4; i++)
                 {
                     robotsObjects[i].transform.localPosition = new Vector3(xPos[posTaken[i]], 0.0175f, -0.03475f);
+                    if(colorsTaken[i] == 0)
+                    {
+                        coordinates[3] = startingCoords[i];
+                    }
+                    if (colorsTaken[i] == 1)
+                    {
+                        coordinates[2] = startingCoords[i];
+                    }
+                    if (colorsTaken[i] == 2)
+                    {
+                        coordinates[0] = startingCoords[i];
+                    }
+                    if (colorsTaken[i] == 3)
+                    {
+                        coordinates[1] = startingCoords[i];
+                    }
                     robots[i].material = regMats[colorsTaken[posTaken[i]]];
                 }
                 robotFinder();
@@ -529,6 +515,7 @@ public class robotProgrammingScript : MonoBehaviour
         {
             PickLEDcolor();
         }
+        return;
     }
 
     void buttonPressed(KMSelectable pressedButton)
@@ -560,7 +547,23 @@ public class robotProgrammingScript : MonoBehaviour
                 {
                     if (colorsTaken[i] == ledIndex)
                     {
-                        colorMovement.Add(i);
+                        if (colorsTaken[i] == 0)
+                        {
+                            colorMovement.Add(3);
+                        }
+                        if (colorsTaken[i] == 1)
+                        {
+                            colorMovement.Add(2);
+                        }
+                        if (colorsTaken[i] == 2)
+                        {
+                            colorMovement.Add(0);
+                        }
+                        if (colorsTaken[i] == 3)
+                        {
+                            colorMovement.Add(1);
+                        }
+                        pyshicalMovement.Add(i);
                         PickLEDcolor();
                         if (robotOrder[i] == 0)
                         {
@@ -704,13 +707,21 @@ public class robotProgrammingScript : MonoBehaviour
             else if (pressedButton == buttons[0])
             {
                 GetComponent<KMAudio>().PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
+                commandDisplay.text = "";
                 moduleStriked();
                 PickLEDcolor();
             }
             else if (pressedButton == buttons[1])
             {
-
-                calculatingMovement();
+                if (movement.Count() == 0)
+                {
+                    return;
+                }
+                else
+                {
+                    moduleSolved = true;
+                    calculatingMovement();
+                }
             }
             else
             {
@@ -753,74 +764,147 @@ public class robotProgrammingScript : MonoBehaviour
 
     void calculatingMovement()
     {
-        /*/if (movement.Count() == 0)
-        {
-            audio.PlaySoundAtTransform("strike", transform);
-            DebugMsg("ERROR: Robot not at goal. Module striked.");
-            GetComponent<KMBombModule>().HandleStrike();
-            moduleStriked();
-            return;
-        }/*/
+
         if (calcNum == movement.Count())
         {
             calculatingEnd();
             return;
         }
-        if (coordinates[colorMovement[calcNum]] < 0)
-        {
-            audio.PlaySoundAtTransform("strike", transform);
-            DebugMsg("ERROR: Robot outside of boundries. Module striked.");
-            GetComponent<KMBombModule>().HandleStrike();
-            moduleStriked();
-            return;
-        }
         if (movement[calcNum] == 0)
         {
             coordinates[colorMovement[calcNum]] = coordinates[colorMovement[calcNum]] + 9;
-            robotsObjects[whichRobots[colorMovement[calcNum]]].transform.localPosition = new Vector3(robotsObjects[whichRobots[colorMovement[calcNum]]].transform.localPosition.x, robotsObjects[whichRobots[colorMovement[calcNum]]].transform.localPosition.y, robotsObjects[whichRobots[colorMovement[calcNum]]].transform.localPosition.z - .01f);
         }
         else if (movement[calcNum] == 1)
         {
             coordinates[colorMovement[calcNum]] = coordinates[colorMovement[calcNum]] - 1;
-            robotsObjects[whichRobots[colorMovement[calcNum]]].transform.localPosition = new Vector3(robotsObjects[whichRobots[colorMovement[calcNum]]].transform.localPosition.x - .01f, robotsObjects[whichRobots[colorMovement[calcNum]]].transform.localPosition.y, robotsObjects[whichRobots[colorMovement[calcNum]]].transform.localPosition.z);
         }
         else if (movement[calcNum] == 2)
         {
+            trackerActive = true;
+            r2d2tracker++;
             coordinates[colorMovement[calcNum]] = coordinates[colorMovement[calcNum]] - 9;
-            robotsObjects[whichRobots[colorMovement[calcNum]]].transform.localPosition = new Vector3(robotsObjects[whichRobots[colorMovement[calcNum]]].transform.localPosition.x, robotsObjects[whichRobots[colorMovement[calcNum]]].transform.localPosition.y, robotsObjects[whichRobots[colorMovement[calcNum]]].transform.localPosition.z + .01f);
         }
         else if (movement[calcNum] == 3)
         {
+            fenderTrackActove = true;
+            fenderTracker++;
+            if (fenderTracker == 6)
+            {
+                fenderTracker = 0;
+            }
             coordinates[colorMovement[calcNum]] = coordinates[colorMovement[calcNum]] + 1;
-            robotsObjects[whichRobots[colorMovement[calcNum]]].transform.localPosition = new Vector3(robotsObjects[whichRobots[colorMovement[calcNum]]].transform.localPosition.x + .01f, robotsObjects[whichRobots[colorMovement[calcNum]]].transform.localPosition.y, robotsObjects[whichRobots[colorMovement[calcNum]]].transform.localPosition.z);
         }
-        Invoke("duringCheck", .75f);
+        duringCheck();
     }
 
     void duringCheck()
     {
         if (maze[coordinates[colorMovement[calcNum]]] == 'X' || coordinates[0] == coordinates[1] || coordinates[0] == coordinates[2] || coordinates[0] == coordinates[3] || coordinates[1] == coordinates[2] || coordinates[1] == coordinates[3] || coordinates[2] == coordinates[3])
         {
+            if (movement[calcNum] == 0)
+            {
+                coordinates[colorMovement[calcNum]] = coordinates[colorMovement[calcNum]] - 9;
+            }
+            else if (movement[calcNum] == 1)
+            {
+                coordinates[colorMovement[calcNum]] = coordinates[colorMovement[calcNum]] + 1;
+            }
+            else if (movement[calcNum] == 2)
+            {
+                coordinates[colorMovement[calcNum]] = coordinates[colorMovement[calcNum]] + 9;
+            }
+            else if (movement[calcNum] == 3)
+            {
+                coordinates[colorMovement[calcNum]] = coordinates[colorMovement[calcNum]] - 1;
+            }
+            if(movement[calcNum] == 2 && trackerActive == true)
+            {
+                r2d2tracker = r2d2tracker - 1;
+                if (r2d2tracker % 2 == 0)
+                {
+                    r2d2movement = false;
+                }
+                else
+                {
+                    r2d2movement = true;
+                }
+            }
+            else if (movement[calcNum] == 3)
+            {
+                if (fenderFirstMove == true)
+                {
+                    if (fenderTracker >= 2)
+                    {
+                        fenderFirstMove = false;
+                        duringCheck();
+                    }
+                    else
+                    {
+                        fenderTracker = 0;
+                        fenderMovement = fenderTracker;
+                    }
+                }
+                else
+                {
+                    if (fenderTracker == 0)
+                    {
+                        fenderMovement = 5;
+                    }
+                    else
+                    {
+                        fenderTracker = fenderTracker - 1;
+                        fenderMovement = fenderTracker;
+                    }
+                }
+            }
             audio.PlaySoundAtTransform("strike", transform);
             DebugMsg("ERROR: Robot crashed. Module striked.");
+            commandDisplay.text = "CRASHED";
             DebugMsg("Successful movements: " + calcNum);
             GetComponent<KMBombModule>().HandleStrike();
-            for (int i = 0; i < 4; i++)
-            {
-                robotsObjects[i].transform.localPosition = new Vector3(xPos[posTaken[i]], 0.0175f, -0.03475f);
-            }
+            moduleSolved = false;
             moduleStriked();
+            Invoke("strikedDisplay", 1);
+        }
+        else if (coordinates[colorMovement[calcNum]] < 0)
+        {
+            audio.PlaySoundAtTransform("strike", transform);
+            DebugMsg("ERROR: Robot outside of boundries. Module striked.");
+            commandDisplay.text = "OOB";
+            GetComponent<KMBombModule>().HandleStrike();
+            moduleStriked();
+            Invoke("strikedDisplay", 1);
         }
         else
         {
-            calcNum++;
-            calculatingMovement();
+            mover();
         }
+    }
+
+    void mover()
+    {
+        if (movement[calcNum] == 0)
+        {
+            robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition = new Vector3(robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.x, robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.y, robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.z - .01f);
+        }
+        else if (movement[calcNum] == 1)
+        {
+            robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition = new Vector3(robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.x - .01f, robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.y, robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.z);
+        }
+        else if (movement[calcNum] == 2)
+        {
+            robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition = new Vector3(robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.x, robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.y, robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.z + .01f);
+        }
+        else if (movement[calcNum] == 3)
+        {
+            robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition = new Vector3(robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.x + .01f, robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.y, robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.z);
+        }
+        calcNum++;
+        Invoke("calculatingMovement",.25f);
     }
 
     void calculatingEnd()
     {
-        commandDisplay.text = "" + maze[coordinates[0]] + maze[coordinates[1]] + maze[coordinates[2]] + maze[coordinates[3]];
         if (maze[coordinates[0]] == '1' && maze[coordinates[1]] == '2' && maze[coordinates[2]] == '3' && maze[coordinates[3]] == '4')
         {
             audio.PlaySoundAtTransform("solve", transform);
@@ -832,12 +916,17 @@ public class robotProgrammingScript : MonoBehaviour
             audio.PlaySoundAtTransform("strike", transform);
             DebugMsg("ERROR: Robot not at goal. Module striked.");
             GetComponent<KMBombModule>().HandleStrike();
-            for (int i = 0; i < 4; i++)
-            {
-                robotsObjects[i].transform.localPosition = new Vector3(xPos[posTaken[i]], 0.0175f, -0.03475f);
-            }
+            moduleSolved = false;
+            commandDisplay.text = "OOC";
             moduleStriked();
+            fenderMovement = fenderTracker;
+            Invoke("strikedDisplay",1);
         }
+    }
+
+    void strikedDisplay()
+    {
+        commandDisplay.text = "" + regMats[colorsTaken[0]].name[0] + regMats[colorsTaken[1]].name[0] + regMats[colorsTaken[2]].name[0] + regMats[colorsTaken[3]].name[0] + " " + (fenderMovement + 1);
     }
 
     public string TwitchHelpMessage = "Use !{0} press left to press the left button. (Valid buttons are left, right, up, down). Use !{0} block blue/red/green/yellow to block that color. Use !{0} start to start the program. Use !{0} reset to reset the program.";

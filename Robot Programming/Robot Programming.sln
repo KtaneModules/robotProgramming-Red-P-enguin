@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Robot Programming", "Robot Programming.csproj", "{B7B8EB4B-B37E-6318-5174-26588521E759}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Robot Programming.Editor", "Robot Programming.Editor.csproj", "{EDD76279-498E-6247-BC89-842F7B96DF0F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B7B8EB4B-B37E-6318-5174-26588521E759}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7B8EB4B-B37E-6318-5174-26588521E759}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7B8EB4B-B37E-6318-5174-26588521E759}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7B8EB4B-B37E-6318-5174-26588521E759}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDD76279-498E-6247-BC89-842F7B96DF0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDD76279-498E-6247-BC89-842F7B96DF0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDD76279-498E-6247-BC89-842F7B96DF0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDD76279-498E-6247-BC89-842F7B96DF0F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
