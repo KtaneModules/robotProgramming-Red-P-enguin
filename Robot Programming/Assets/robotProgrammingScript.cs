@@ -542,7 +542,14 @@ public class robotProgrammingScript : MonoBehaviour
 
     private bool isStuck(int stuckCoordNum, int whichCoord)
     {
-        for(int i = 0; i < movement.Count(); i++)
+        for (int i = 0; i < 4; i++)
+        {
+            if (stuckCoordinates[i] < 0)
+            {
+                stuckCoordinates[i] = 0;
+            }
+        }
+        for (int i = 0; i < movement.Count(); i++)
         {
             if (maze[stuckCoordinates[colorMovement[i]]] != 'X')
             {
@@ -564,7 +571,7 @@ public class robotProgrammingScript : MonoBehaviour
                 }
             }
         }
-        if (maze[stuckCoordinates[whichCoord] + stuckCoordNum] == 'X' || stuckCoordinates[whichCoord] + stuckCoordNum == stuckCoordinates[0] || stuckCoordinates[whichCoord] + stuckCoordNum == stuckCoordinates[1] || stuckCoordinates[whichCoord] + stuckCoordNum == stuckCoordinates[2] || stuckCoordinates[whichCoord] + stuckCoordNum == stuckCoordinates[3])
+        if (stuckCoordinates[whichCoord] + stuckCoordNum == stuckCoordinates[0] || stuckCoordinates[whichCoord] + stuckCoordNum == stuckCoordinates[1] || stuckCoordinates[whichCoord] + stuckCoordNum == stuckCoordinates[2] || stuckCoordinates[whichCoord] + stuckCoordNum == stuckCoordinates[3])
         {
             return true;
         }
@@ -588,8 +595,10 @@ public class robotProgrammingScript : MonoBehaviour
             if (arrowButtons.Contains(pressedButton))
             {
                 GetComponent<KMAudio>().PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
+                pressedButtons.Add(pressedButton.name);
                 for (int i = 0; i < 4; i++)
                 {
+                    commandDisplay.text = "" + pressedButtons[pressedButtons.Count() - 3] + " " + pressedButtons[pressedButtons.Count() - 2] + " " + pressedButtons[pressedButtons.Count() - 1];
                     if (colorsTaken[i] == ledIndex)
                     {
                         if (colorsTaken[i] == 0)
@@ -877,9 +886,11 @@ public class robotProgrammingScript : MonoBehaviour
             moduleSolved = false;
             audio.PlaySoundAtTransform("strike", transform);
             DebugMsg("ERROR: Robot crashed. Module striked.");
+            DebugMsg("ERROR: Successful movements: " + calcNum);
             commandDisplay.text = "CRASHED";
             GetComponent<KMBombModule>().HandleStrike();
             Invoke("moduleStriked", 1);
+            moduleStriked();
             strikedDisplay();
         }
         else if (coordinates[colorMovement[calcNum]] < 0)
@@ -953,70 +964,29 @@ public class robotProgrammingScript : MonoBehaviour
         }
     }
 
-    private bool isCommandValid(string cmd)
-    {
-
-        var parts = cmd.ToLowerInvariant().Split(new[] { ' ' });
-
-        foreach (var btn in parts)
-        {
-            if (!validbtns.Contains(btn.ToLower()))
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
     public string TwitchHelpMessage = "Use !{0} press left to press the left button. (Valid buttons are left, right, up, down). Use !{0} block blue/red/green/yellow to block that color. Use !{0} start to start the program. Use !{0} reset to reset the program.";
     IEnumerator ProcessTwitchCommand(string cmd)
     {
-        var parts = cmd.ToLowerInvariant().Split(new[] { ' ' });
+        var parms = cmd.ToLowerInvariant().Split(new[] { ' ' });
 
-        if (parts[0] == "l" || parts[0] == "u" || parts[0] == "r" || parts[0] == "d" || parts[0] == "left" || parts[0] == "up" || parts[0] == "right" || parts[0] == "down")
+        if (parms.Length == 2 && parms[0].ToLower() == "block")
         {
-            if (isCommandValid(cmd))
-            {
-                yield return null;
-                for (int i = 0; i < parts.Count(); i++)
-                {
-                    if (parts[i].ToLower() == "down" || parts[i].ToLower() == "d")
-                    {
-                        yield return new KMSelectable[] { arrowButtons[0] };
-                    }
-                    else if (parts[i].ToLower() == "left" || parts[i].ToLower() == "l")
-                    {
-                        yield return new KMSelectable[] { arrowButtons[0] };
-                    }
-                    else if (parts[i].ToLower() == "up" || parts[i].ToLower() == "u")
-                    {
-                        yield return new KMSelectable[] { arrowButtons[0] };
-                    }
-                    else if (parts[i].ToLower() == "right" || parts[i].ToLower() == "r")
-                    {
-                        yield return new KMSelectable[] { arrowButtons[0] };
-                    }
-                }
-            }
-        }
-        else if (parts.Length == 2 && parts[0].ToLower() == "block")
-        {
-            if (parts[1].ToLower() == "red" || parts[1].ToLower() == "r")
+            if (parms[1].ToLower() == "red" || parms[1].ToLower() == "r")
             {
                 yield return null;
                 yield return new KMSelectable[] { buttons[4] };
             }
-            else if (parts[1].ToLower() == "yellow" || parts[1].ToLower() == "y")
+            else if (parms[1].ToLower() == "yellow" || parms[1].ToLower() == "y")
             {
                 yield return null;
                 yield return new KMSelectable[] { buttons[5] };
             }
-            else if (parts[1].ToLower() == "green" || parts[1].ToLower() == "g")
+            else if (parms[1].ToLower() == "green" || parms[1].ToLower() == "g")
             {
                 yield return null;
                 yield return new KMSelectable[] { buttons[3] };
             }
-            else if (parts[1].ToLower() == "blue" || parts[1].ToLower() == "b")
+            else if (parms[1].ToLower() == "blue" || parms[1].ToLower() == "b")
             {
                 yield return null;
                 yield return new KMSelectable[] { buttons[2] };
@@ -1026,19 +996,45 @@ public class robotProgrammingScript : MonoBehaviour
                 yield break;
             }
         }
-        else if (parts.Length == 1 && parts[0].ToLower() == "start")
+        else if (parms.Length == 1 && parms[0].ToLower() == "start")
         {
             yield return null;
             yield return new KMSelectable[] { buttons[0] };
         }
-        else if (parts.Length == 1 && parts[0].ToLower() == "reset")
+        else if (parms.Length == 1 && parms[0].ToLower() == "reset")
         {
             yield return null;
             yield return new KMSelectable[] { buttons[1] };
         }
         else
         {
-            yield break;
+            string[] parameters = cmd.Split(' ');
+            var buttonsToPress = new List<KMSelectable>();
+            foreach (string parm in parameters)
+            {
+                if (parm.ToLower() == "l" || parm.ToLower() == "left")
+                {
+                    buttonsToPress.Add(arrowButtons[1]);
+                }
+                else  if (parm.ToLower() == "d" || parm.ToLower() == "down")
+                {
+                    buttonsToPress.Add(arrowButtons[0]);
+                }
+                else if (parm.ToLower() == "u" || parm.ToLower() == "up")
+                {
+                    buttonsToPress.Add(arrowButtons[2]);
+                }
+                else if (parm.ToLower() == "r" || parm.ToLower() == "right")
+                {
+                    buttonsToPress.Add(arrowButtons[3]);
+                }
+                else
+                {
+                    yield break;
+                }
+            }
+            yield return null;
+            yield return buttonsToPress;
         }
     }
 
