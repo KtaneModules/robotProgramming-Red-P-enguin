@@ -231,10 +231,6 @@ public class robotProgrammingScript : MonoBehaviour
 
     void Start()
     {
-        coordinates.Add(64);
-        coordinates.Add(66);
-        coordinates.Add(68);
-        coordinates.Add(70);
         //intialization
         pressedButtons.Add("");
         pressedButtons.Add("");
@@ -285,6 +281,10 @@ public class robotProgrammingScript : MonoBehaviour
         index = UnityEngine.Random.Range(0, 16);
         bottomDisplay.sprite = mazes[index + 16];
         maze = maze + bottoms[index];
+        coordinates.Add(64);
+        coordinates.Add(66);
+        coordinates.Add(68);
+        coordinates.Add(70);
         topText.text = topText.text + " " + (index + 1);
         moduleStriked();
         colorRobot();
@@ -482,10 +482,6 @@ public class robotProgrammingScript : MonoBehaviour
 
     void PickLEDcolor()
     {
-        for (int i = 0; i < 4; i++)
-        {
-            stuckCoordinates[i] = coordinates[i];
-        }
         ledIndex++;
         if (ledIndex > 3)
         {
@@ -497,27 +493,31 @@ public class robotProgrammingScript : MonoBehaviour
             {
                 if (colorsTaken[i] == 0)
                 {
+                    i = 4;
                     if (isStuck(9, 3) && isStuck(-9, 3) && isStuck(1, 3) && isStuck(-1, 3))
                     {
                         PickLEDcolor();
                     }
                 }
-                if (colorsTaken[i] == 1)
+                else if (colorsTaken[i] == 1)
                 {
+                    i = 4;
                     if (isStuck(9, 2) && isStuck(-9, 2) && isStuck(1, 2) && isStuck(-1, 2))
                     {
                         PickLEDcolor();
                     }
                 }
-                if (colorsTaken[i] == 2)
+                else if (colorsTaken[i] == 2)
                 {
+                    i = 4;
                     if (isStuck(9, 0) && isStuck(-9, 0) && isStuck(1, 0) && isStuck(-1, 0))
                     {
                         PickLEDcolor();
                     }
                 }
-                if (colorsTaken[i] == 3)
+                else if (colorsTaken[i] == 3)
                 {
+                    i = 4;
                     if (isStuck(9, 1) && isStuck(-9, 1) && isStuck(1, 1) && isStuck(-1, 1))
                     {
                         PickLEDcolor();
@@ -544,6 +544,7 @@ public class robotProgrammingScript : MonoBehaviour
     {
         for (int i = 0; i < 4; i++)
         {
+            stuckCoordinates[i] = coordinates[i];
             if (stuckCoordinates[i] < 0)
             {
                 stuckCoordinates[i] = 0;
@@ -553,25 +554,29 @@ public class robotProgrammingScript : MonoBehaviour
         {
             if (maze[stuckCoordinates[colorMovement[i]]] != 'X')
             {
-                if (movement[calcNum] == 0)
+                if (movement[i] == 0)
                 {
                     stuckCoordinates[colorMovement[i]] = stuckCoordinates[colorMovement[i]] + 9;
                 }
-                else if (movement[calcNum] == 1)
+                else if (movement[i] == 1)
                 {
                     stuckCoordinates[colorMovement[i]] = stuckCoordinates[colorMovement[i]] - 1;
                 }
-                else if (movement[calcNum] == 2)
+                else if (movement[i] == 2)
                 {
                     stuckCoordinates[colorMovement[i]] = stuckCoordinates[colorMovement[i]] - 9;
                 }
-                else if (movement[calcNum] == 3)
+                else if (movement[i] == 3)
                 {
                     stuckCoordinates[colorMovement[i]] = stuckCoordinates[colorMovement[i]] + 1;
                 }
             }
         }
-        if (stuckCoordinates[whichCoord] + stuckCoordNum == stuckCoordinates[0] || stuckCoordinates[whichCoord] + stuckCoordNum == stuckCoordinates[1] || stuckCoordinates[whichCoord] + stuckCoordNum == stuckCoordinates[2] || stuckCoordinates[whichCoord] + stuckCoordNum == stuckCoordinates[3])
+        if (stuckCoordinates[whichCoord] + stuckCoordNum < 0 || stuckCoordinates[whichCoord] + stuckCoordNum > 80)
+        {
+            return true;
+        }
+        if (stuckCoordinates[whichCoord] + stuckCoordNum == stuckCoordinates[0] || stuckCoordinates[whichCoord] + stuckCoordNum == stuckCoordinates[1] || stuckCoordinates[whichCoord] + stuckCoordNum == stuckCoordinates[2] || stuckCoordinates[whichCoord] + stuckCoordNum == stuckCoordinates[3] || maze[stuckCoordinates[whichCoord] + stuckCoordNum] == 'X')
         {
             return true;
         }
@@ -618,7 +623,6 @@ public class robotProgrammingScript : MonoBehaviour
                             colorMovement.Add(1);
                         }
                         pyshicalMovement.Add(i);
-                        PickLEDcolor();
                         if (robotOrder[i] == 0)
                         {
                             DebugMsg("You are controlling R.O.B.");
@@ -754,6 +758,7 @@ public class robotProgrammingScript : MonoBehaviour
                                 fenderMovement = 0;
                             }
                         }
+                        PickLEDcolor();
                         i = 4;
                     }
                 }
