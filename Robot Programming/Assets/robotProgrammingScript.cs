@@ -57,7 +57,9 @@ public class robotProgrammingScript : MonoBehaviour
     private List<string> pressedButtons = new List<string>();
 
     private bool r2d2movement = false;
+    private bool correctr2d2movement = false;
     private int fenderMovement = 0;
+    private int correctfenderMovement = 0;
     private int r2d2tracker = 0;
     private int fenderTracker = 0;
 
@@ -66,6 +68,7 @@ public class robotProgrammingScript : MonoBehaviour
     private List<string> bottoms = new List<string>();
 
     string[] validbtns = { "left", "up", "right", "down", "l", "u", "r", "d" };
+    string[] debugArrowNames = { "Down", "Left", "Up", "Right" };
     //tops
     private string T1 = "X1X2X3X4X" +
                        "XOOOXOOOX" +
@@ -231,6 +234,8 @@ public class robotProgrammingScript : MonoBehaviour
 
     void Start()
     {
+        correctr2d2movement = r2d2movement;
+        correctfenderMovement = fenderMovement;
         //intialization
         pressedButtons.Add("");
         pressedButtons.Add("");
@@ -292,6 +297,8 @@ public class robotProgrammingScript : MonoBehaviour
 
     void moduleStriked()
     {
+        r2d2movement = correctr2d2movement;
+        fenderMovement = correctfenderMovement;
         moduleSolved = false;
         calcNum = 0;
         colorsBlocked.Clear();
@@ -343,15 +350,15 @@ public class robotProgrammingScript : MonoBehaviour
                     {
                         coordinates[3] = startingCoords[i];
                     }
-                    if (colorsTaken[i] == 1)
+                    if (colorsTaken[i] == (1))
                     {
                         coordinates[2] = startingCoords[i];
                     }
-                    if (colorsTaken[i] == 2)
+                    if (colorsTaken[i] == (2))
                     {
                         coordinates[0] = startingCoords[i];
                     }
-                    if (colorsTaken[i] == 3)
+                    if (colorsTaken[i] == (3))
                     {
                         coordinates[1] = startingCoords[i];
                     }
@@ -369,7 +376,7 @@ public class robotProgrammingScript : MonoBehaviour
     void robotFinder()
     {
         // Red or Green in first pos
-        if (colorsTaken[0] == 1 || colorsTaken[0] == 2)
+        if (colorsTaken[0] == (1) || colorsTaken[0] == (2))
         {
             DebugMsg("Red or Lime is in first position. First condition applies.");
             conditionsTrue.Add(1);
@@ -380,7 +387,7 @@ public class robotProgrammingScript : MonoBehaviour
             conditionsTrue.Add(0);
         }
         // Hexagon is yellow
-        if (colorsTaken[posTaken[3]] == 3)
+        if (colorsTaken[posTaken[3]] == (3))
         {
             DebugMsg("Hexagon is yellow. Second condition applies.");
             conditionsTrue.Add(1);
@@ -391,7 +398,7 @@ public class robotProgrammingScript : MonoBehaviour
             conditionsTrue.Add(0);
         }
         // Triangle in 3rd pos
-        if (posTaken[2] == 2)
+        if (posTaken[2] == (2))
         {
             DebugMsg("Triangle is in third position. Third condition applies.");
             conditionsTrue.Add(1);
@@ -409,10 +416,10 @@ public class robotProgrammingScript : MonoBehaviour
             {
                 if (conditionsTrue[2] != 1)
                 {
-                    robotOrder.Add(0);
-                    robotOrder.Add(1);
-                    robotOrder.Add(2);
-                    robotOrder.Add(3);
+                    robotOrder.Add(0); //rob
+                    robotOrder.Add(1); //hal
+                    robotOrder.Add(2); //r2d2
+                    robotOrder.Add(3); //fender
                 }
                 else
                 {
@@ -489,9 +496,9 @@ public class robotProgrammingScript : MonoBehaviour
         }
         for (int i = 0; i < 4; i++)
         {
-            if (colorsTaken[i] == ledIndex)
+            if (colorsTaken[i] == (ledIndex))
             {
-                if (colorsTaken[i] == 0)
+                if (colorsTaken[i] == (0))
                 {
                     i = 4;
                     if (isStuck(9, 3) && isStuck(-9, 3) && isStuck(1, 3) && isStuck(-1, 3))
@@ -499,7 +506,7 @@ public class robotProgrammingScript : MonoBehaviour
                         PickLEDcolor();
                     }
                 }
-                else if (colorsTaken[i] == 1)
+                else if (colorsTaken[i] == (1))
                 {
                     i = 4;
                     if (isStuck(9, 2) && isStuck(-9, 2) && isStuck(1, 2) && isStuck(-1, 2))
@@ -507,7 +514,7 @@ public class robotProgrammingScript : MonoBehaviour
                         PickLEDcolor();
                     }
                 }
-                else if (colorsTaken[i] == 2)
+                else if (colorsTaken[i] == (2))
                 {
                     i = 4;
                     if (isStuck(9, 0) && isStuck(-9, 0) && isStuck(1, 0) && isStuck(-1, 0))
@@ -515,7 +522,7 @@ public class robotProgrammingScript : MonoBehaviour
                         PickLEDcolor();
                     }
                 }
-                else if (colorsTaken[i] == 3)
+                else if (colorsTaken[i] == (3))
                 {
                     i = 4;
                     if (isStuck(9, 1) && isStuck(-9, 1) && isStuck(1, 1) && isStuck(-1, 1))
@@ -545,28 +552,31 @@ public class robotProgrammingScript : MonoBehaviour
         for (int i = 0; i < 4; i++)
         {
             stuckCoordinates[i] = coordinates[i];
-            if (stuckCoordinates[i] < 0)
-            {
-                stuckCoordinates[i] = 0;
-            }
         }
         for (int i = 0; i < movement.Count(); i++)
         {
+            for(int j = 0; j < 4; j++)
+            {
+                if (stuckCoordinates[j] <= 0)
+                {
+                    stuckCoordinates[j] = 0;
+                }
+            }
             if (maze[stuckCoordinates[colorMovement[i]]] != 'X')
             {
-                if (movement[i] == 0)
+                if (movement[i] == (0))
                 {
                     stuckCoordinates[colorMovement[i]] = stuckCoordinates[colorMovement[i]] + 9;
                 }
-                else if (movement[i] == 1)
+                else if (movement[i] == (1))
                 {
                     stuckCoordinates[colorMovement[i]] = stuckCoordinates[colorMovement[i]] - 1;
                 }
-                else if (movement[i] == 2)
+                else if (movement[i] == (2))
                 {
                     stuckCoordinates[colorMovement[i]] = stuckCoordinates[colorMovement[i]] - 9;
                 }
-                else if (movement[i] == 3)
+                else if (movement[i] == (3))
                 {
                     stuckCoordinates[colorMovement[i]] = stuckCoordinates[colorMovement[i]] + 1;
                 }
@@ -576,7 +586,7 @@ public class robotProgrammingScript : MonoBehaviour
         {
             return true;
         }
-        if (stuckCoordinates[whichCoord] + stuckCoordNum == stuckCoordinates[0] || stuckCoordinates[whichCoord] + stuckCoordNum == stuckCoordinates[1] || stuckCoordinates[whichCoord] + stuckCoordNum == stuckCoordinates[2] || stuckCoordinates[whichCoord] + stuckCoordNum == stuckCoordinates[3] || maze[stuckCoordinates[whichCoord] + stuckCoordNum] == 'X')
+        if ((stuckCoordinates[whichCoord] + stuckCoordNum) == (stuckCoordinates[0]) || (stuckCoordinates[whichCoord] + stuckCoordNum) == (stuckCoordinates[1]) || (stuckCoordinates[whichCoord] + stuckCoordNum) == (stuckCoordinates[2]) || (stuckCoordinates[whichCoord] + stuckCoordNum) == (stuckCoordinates[3]) || maze[stuckCoordinates[whichCoord] + stuckCoordNum] == ('X'))
         {
             return true;
         }
@@ -604,85 +614,86 @@ public class robotProgrammingScript : MonoBehaviour
                 for (int i = 0; i < 4; i++)
                 {
                     commandDisplay.text = "" + pressedButtons[pressedButtons.Count() - 3] + " " + pressedButtons[pressedButtons.Count() - 2] + " " + pressedButtons[pressedButtons.Count() - 1];
-                    if (colorsTaken[i] == ledIndex)
+                    DebugMsg("You pressed " + pressedButton.name + ".");
+                    if (colorsTaken[i] == (ledIndex))
                     {
-                        if (colorsTaken[i] == 0)
+                        if (colorsTaken[i] == (0))
                         {
                             colorMovement.Add(3);
                         }
-                        if (colorsTaken[i] == 1)
+                        if (colorsTaken[i] == (1))
                         {
                             colorMovement.Add(2);
                         }
-                        if (colorsTaken[i] == 2)
+                        if (colorsTaken[i] == (2))
                         {
                             colorMovement.Add(0);
                         }
-                        if (colorsTaken[i] == 3)
+                        if (colorsTaken[i] == (3))
                         {
                             colorMovement.Add(1);
                         }
                         pyshicalMovement.Add(i);
-                        if (robotOrder[i] == 0)
+                        if (robotOrder[i] == (0))
                         {
                             DebugMsg("You are controlling R.O.B.");
-                            if (pressedButton == arrowButtons[0])
+                            if (pressedButton == (arrowButtons[0]))
                             {
                                 movement.Add(0);
                             }
-                            if (pressedButton == arrowButtons[1])
+                            if (pressedButton == (arrowButtons[1]))
                             {
                                 movement.Add(1);
                             }
-                            if (pressedButton == arrowButtons[2])
+                            if (pressedButton == (arrowButtons[2]))
                             {
                                 movement.Add(2);
                             }
-                            if (pressedButton == arrowButtons[3])
+                            if (pressedButton == (arrowButtons[3]))
                             {
                                 movement.Add(3);
                             }
                         }
-                        else if (robotOrder[i] == 1)
+                        else if (robotOrder[i] == (1))
                         {
                             DebugMsg("You are controlling HAL.");
-                            if (pressedButton == arrowButtons[0])
+                            if (pressedButton == (arrowButtons[0]))
                             {
                                 movement.Add(2);
                             }
-                            if (pressedButton == arrowButtons[1])
+                            if (pressedButton == (arrowButtons[1]))
                             {
                                 movement.Add(3);
                             }
-                            if (pressedButton == arrowButtons[2])
+                            if (pressedButton == (arrowButtons[2]))
                             {
                                 movement.Add(0);
                             }
-                            if (pressedButton == arrowButtons[3])
+                            if (pressedButton == (arrowButtons[3]))
                             {
                                 movement.Add(1);
                             }
                         }
-                        else if (robotOrder[i] == 2)
+                        else if (robotOrder[i] == (2))
                         {
                             DebugMsg("You are controlling R2D2.");
-                            if (r2d2movement == false)
+                            if (r2d2movement == (false))
                             {
                                 DebugMsg("R2D2 will act like R.O.B.");
                                 r2d2movement = true;
-                                if (pressedButton == arrowButtons[0])
+                                if (pressedButton == (arrowButtons[0]))
                                 {
                                     movement.Add(0);
                                 }
-                                if (pressedButton == arrowButtons[1])
+                                if (pressedButton == (arrowButtons[1]))
                                 {
                                     movement.Add(1);
                                 }
-                                if (pressedButton == arrowButtons[2])
+                                if (pressedButton == (arrowButtons[2]))
                                 {
                                     movement.Add(2);
                                 }
-                                if (pressedButton == arrowButtons[3])
+                                if (pressedButton == (arrowButtons[3]))
                                 {
                                     movement.Add(3);
                                 }
@@ -691,19 +702,19 @@ public class robotProgrammingScript : MonoBehaviour
                             {
                                 r2d2movement = false;
                                 DebugMsg("R2D2 will act like HAL.");
-                                if (pressedButton == arrowButtons[0])
+                                if (pressedButton == (arrowButtons[0]))
                                 {
                                     movement.Add(2);
                                 }
-                                if (pressedButton == arrowButtons[1])
+                                if (pressedButton == (arrowButtons[1]))
                                 {
                                     movement.Add(3);
                                 }
-                                if (pressedButton == arrowButtons[2])
+                                if (pressedButton == (arrowButtons[2]))
                                 {
                                     movement.Add(0);
                                 }
-                                if (pressedButton == arrowButtons[3])
+                                if (pressedButton == (arrowButtons[3]))
                                 {
                                     movement.Add(1);
                                 }
@@ -715,19 +726,19 @@ public class robotProgrammingScript : MonoBehaviour
                             if (char.IsDigit(bomb.GetSerialNumber()[fenderMovement]))
                             {
                                 DebugMsg("Fender will act like R.O.B.");
-                                if (pressedButton == arrowButtons[0])
+                                if (pressedButton == (arrowButtons[0]))
                                 {
                                     movement.Add(0);
                                 }
-                                if (pressedButton == arrowButtons[1])
+                                if (pressedButton == (arrowButtons[1]))
                                 {
                                     movement.Add(1);
                                 }
-                                if (pressedButton == arrowButtons[2])
+                                if (pressedButton == (arrowButtons[2]))
                                 {
                                     movement.Add(2);
                                 }
-                                if (pressedButton == arrowButtons[3])
+                                if (pressedButton == (arrowButtons[3]))
                                 {
                                     movement.Add(3);
                                 }
@@ -735,72 +746,74 @@ public class robotProgrammingScript : MonoBehaviour
                             else
                             {
                                 DebugMsg("Fender will act like HAL.");
-                                if (pressedButton == arrowButtons[0])
+                                if (pressedButton == (arrowButtons[0]))
                                 {
                                     movement.Add(2);
                                 }
-                                if (pressedButton == arrowButtons[1])
+                                if (pressedButton == (arrowButtons[1]))
                                 {
                                     movement.Add(3);
                                 }
-                                if (pressedButton == arrowButtons[2])
+                                if (pressedButton == (arrowButtons[2]))
                                 {
                                     movement.Add(0);
                                 }
-                                if (pressedButton == arrowButtons[3])
+                                if (pressedButton == (arrowButtons[3]))
                                 {
                                     movement.Add(1);
                                 }
                             }
                             fenderMovement++;
-                            if (fenderMovement == 6)
+                            if (fenderMovement == (6))
                             {
                                 fenderMovement = 0;
                             }
                         }
+                        DebugMsg("The robot will move " + debugArrowNames[movement[movement.Count - 1]] + ".");
                         PickLEDcolor();
                         i = 4;
                     }
                 }
             }
-            else if(pressedButton == buttons[1])
+            else if(pressedButton == (buttons[1]))
             {
                 moduleStriked();
-                strikedDisplay();
+                commandDisplay.text = "RESET";
+                Invoke("strikedDisplay", 1);
             }
-            else if (pressedButton == buttons[0])
+            else if (pressedButton == (buttons[0]))
             {
                 moduleSolved = true;
                 calculatingMovement();
             }
-            else if (pressedButton == buttons[2])
+            else if (pressedButton == (buttons[2]))
             {
                 colorsBlocked.Add(0);
-                if(ledIndex == 0)
+                if(ledIndex == (0))
                 {
                     PickLEDcolor();
                 }
             }
-            else if (pressedButton == buttons[3])
+            else if (pressedButton == (buttons[3]))
             {
                 colorsBlocked.Add(1);
-                if (ledIndex == 1)
+                if (ledIndex == (1))
                 {
                     PickLEDcolor();
                 }
             }
-            else if (pressedButton == buttons[4])
+            else if (pressedButton == (buttons[4]))
             {
                 colorsBlocked.Add(2);
-                if (ledIndex == 2)
+                if (ledIndex == (2))
                 {
                     PickLEDcolor();
                 }
             }
-            else if (pressedButton == buttons[5])
+            else if (pressedButton == (buttons[5]))
             {
                 colorsBlocked.Add(3);
-                if (ledIndex == 3)
+                if (ledIndex == (3))
                 {
                     PickLEDcolor();
                 }
@@ -810,37 +823,37 @@ public class robotProgrammingScript : MonoBehaviour
 
     void calculatingMovement()
     {
-        if (calcNum == movement.Count())
+        if (calcNum == (movement.Count()))
         {
             calculatingEnd();
         }
         else
         {
-            if (robotOrder[pyshicalMovement[calcNum]] == 2)
+            if (robotOrder[pyshicalMovement[calcNum]] == (2))
             {
                 r2d2tracker++;
             }
-            if (robotOrder[pyshicalMovement[calcNum]] == 3)
+            if (robotOrder[pyshicalMovement[calcNum]] == (3))
             {
                 fenderTracker++;
-                if (fenderTracker == 6)
+                if (fenderTracker == (6))
                 {
                     fenderTracker = 0;
                 }
             }
-            if (movement[calcNum] == 0)
+            if (movement[calcNum] == (0))
             {
                 coordinates[colorMovement[calcNum]] = coordinates[colorMovement[calcNum]] + 9;
             }
-            else if (movement[calcNum] == 1)
+            else if (movement[calcNum] == (1))
             {
                 coordinates[colorMovement[calcNum]] = coordinates[colorMovement[calcNum]] - 1;
             }
-            else if (movement[calcNum] == 2)
+            else if (movement[calcNum] == (2))
             {
                 coordinates[colorMovement[calcNum]] = coordinates[colorMovement[calcNum]] - 9;
             }
-            else if (movement[calcNum] == 3)
+            else if (movement[calcNum] == (3))
             {
                 coordinates[colorMovement[calcNum]] = coordinates[colorMovement[calcNum]] + 1;
             }
@@ -850,28 +863,40 @@ public class robotProgrammingScript : MonoBehaviour
 
     void duringCheck()
     {
-        if (maze[coordinates[colorMovement[calcNum]]] == 'X' || coordinates[0] == coordinates[1] || coordinates[0] == coordinates[2] || coordinates[0] == coordinates[3] || coordinates[1] == coordinates[2] || coordinates[1] == coordinates[3] || coordinates[2] == coordinates[3])
+        if (coordinates[colorMovement[calcNum]] < 0)
         {
-            if (movement[calcNum] == 0)
+            correctr2d2movement = r2d2movement;
+            correctfenderMovement = fenderMovement;
+            moduleSolved = false;
+            audio.PlaySoundAtTransform("strike", transform);
+            DebugMsg("ERROR: Robot outside of boundries. Module striked.");
+            commandDisplay.text = "OOB";
+            GetComponent<KMBombModule>().HandleStrike();
+            Invoke("moduleStriked", 1);
+            strikedDisplay();
+        }
+        else if (maze[coordinates[colorMovement[calcNum]]] == ('X') || coordinates[0] == (coordinates[1]) || coordinates[0] == (coordinates[2]) || coordinates[0] == (coordinates[3]) || coordinates[1] == (coordinates[2]) || coordinates[1] == (coordinates[3]) || coordinates[2] == (coordinates[3]))
+        {
+            if (movement[calcNum] == (0))
             {
                 coordinates[colorMovement[calcNum]] = coordinates[colorMovement[calcNum]] - 9;
             }
-            else if (movement[calcNum] == 1)
+            else if (movement[calcNum] == (1))
             {
                 coordinates[colorMovement[calcNum]] = coordinates[colorMovement[calcNum]] + 1;
             }
-            else if (movement[calcNum] == 2)
+            else if (movement[calcNum] == (2))
             {
                 coordinates[colorMovement[calcNum]] = coordinates[colorMovement[calcNum]] + 9;
             }
-            else if (movement[calcNum] == 3)
+            else if (movement[calcNum] == (3))
             {
                 coordinates[colorMovement[calcNum]] = coordinates[colorMovement[calcNum]] - 1;
             }
-            if (robotOrder[pyshicalMovement[calcNum]] == 2 && r2d2tracker > 0)
+            if (robotOrder[pyshicalMovement[calcNum]] == (2) && r2d2tracker > 0)
             {
                 r2d2tracker = r2d2tracker - 1;
-                if (r2d2tracker % 2 == 0)
+                if ((r2d2tracker % 2) == (0))
                 {
                     r2d2movement = false;
                 }
@@ -880,7 +905,7 @@ public class robotProgrammingScript : MonoBehaviour
                     r2d2movement = true;
                 }
             }
-            else if (robotOrder[pyshicalMovement[calcNum]] == 3)
+            else if (robotOrder[pyshicalMovement[calcNum]] == (3))
             {
                 if (fenderTracker > 0)
                 {
@@ -888,6 +913,10 @@ public class robotProgrammingScript : MonoBehaviour
                 }
                 fenderMovement = fenderTracker;
             }
+            correctr2d2movement = r2d2movement;
+            correctfenderMovement = fenderMovement;
+            r2d2tracker = 0;
+            fenderTracker = 0;
             moduleSolved = false;
             audio.PlaySoundAtTransform("strike", transform);
             DebugMsg("ERROR: Robot crashed. Module striked.");
@@ -898,16 +927,6 @@ public class robotProgrammingScript : MonoBehaviour
             moduleStriked();
             strikedDisplay();
         }
-        else if (coordinates[colorMovement[calcNum]] < 0)
-        {
-            moduleSolved = false;
-            audio.PlaySoundAtTransform("strike", transform);
-            DebugMsg("ERROR: Robot outside of boundries. Module striked.");
-            commandDisplay.text = "OOB";
-            GetComponent<KMBombModule>().HandleStrike();
-            Invoke("moduleStriked", 1);
-            strikedDisplay();
-        }
         else
         {
             mover();
@@ -916,19 +935,19 @@ public class robotProgrammingScript : MonoBehaviour
 
     void mover()
     {
-        if (movement[calcNum] == 0)
+        if (movement[calcNum] == (0))
         {
             robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition = new Vector3(robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.x, robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.y, robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.z - .01f);
         }
-        else if (movement[calcNum] == 1)
+        else if (movement[calcNum] == (1))
         {
             robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition = new Vector3(robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.x - .01f, robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.y, robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.z);
         }
-        else if (movement[calcNum] == 2)
+        else if (movement[calcNum] == (2))
         {
             robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition = new Vector3(robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.x, robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.y, robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.z + .01f);
         }
-        else if (movement[calcNum] == 3)
+        else if (movement[calcNum] == (3))
         {
             robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition = new Vector3(robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.x + .01f, robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.y, robotsObjects[whichRobots[pyshicalMovement[calcNum]]].transform.localPosition.z);
         }
@@ -938,7 +957,7 @@ public class robotProgrammingScript : MonoBehaviour
 
     void calculatingEnd()
     {
-        if (maze[coordinates[0]] == '1' && maze[coordinates[1]] == '2' && maze[coordinates[2]] == '3' && maze[coordinates[3]] == '4')
+        if (maze[coordinates[0]] == ('1') && maze[coordinates[1]] == ('2') && maze[coordinates[2]] == ('3') && maze[coordinates[3]] == ('4'))
         {
             audio.PlaySoundAtTransform("solve", transform);
             DebugMsg("Program run successfully. Module solved.");
@@ -946,6 +965,8 @@ public class robotProgrammingScript : MonoBehaviour
         }
         else
         {
+            correctr2d2movement = r2d2movement;
+            correctfenderMovement = fenderMovement;
             moduleSolved = false;
             audio.PlaySoundAtTransform("strike", transform);
             DebugMsg("ERROR: Out of commands. Module striked.");
@@ -959,7 +980,7 @@ public class robotProgrammingScript : MonoBehaviour
     void strikedDisplay()
     {
         commandDisplay.text = "" + regMats[colorsTaken[0]].name[0] + regMats[colorsTaken[1]].name[0] + regMats[colorsTaken[2]].name[0] + regMats[colorsTaken[3]].name[0] + " " + (fenderMovement + 1);
-        if(r2d2movement == false)
+        if(r2d2movement == (false))
         {
             bottomText.text = "R.O.B";
         }
@@ -974,24 +995,24 @@ public class robotProgrammingScript : MonoBehaviour
     {
         var parms = cmd.ToLowerInvariant().Split(new[] { ' ' });
 
-        if (parms.Length == 2 && parms[0].ToLower() == "block")
+        if (parms.Length == (2) && parms[0].ToLower().Equals("block"))
         {
-            if (parms[1].ToLower() == "red" || parms[1].ToLower() == "r")
+            if (parms[1].ToLower().Equals("red") || parms[1].ToLower().Equals("r"))
             {
                 yield return null;
                 yield return new KMSelectable[] { buttons[4] };
             }
-            else if (parms[1].ToLower() == "yellow" || parms[1].ToLower() == "y")
+            else if (parms[1].ToLower().Equals("yellow") || parms[1].ToLower().Equals("y"))
             {
                 yield return null;
                 yield return new KMSelectable[] { buttons[5] };
             }
-            else if (parms[1].ToLower() == "green" || parms[1].ToLower() == "g")
+            else if (parms[1].ToLower().Equals("green") || parms[1].ToLower().Equals("g"))
             {
                 yield return null;
                 yield return new KMSelectable[] { buttons[3] };
             }
-            else if (parms[1].ToLower() == "blue" || parms[1].ToLower() == "b")
+            else if (parms[1].ToLower().Equals("blue") || parms[1].ToLower().Equals("b"))
             {
                 yield return null;
                 yield return new KMSelectable[] { buttons[2] };
@@ -1001,12 +1022,12 @@ public class robotProgrammingScript : MonoBehaviour
                 yield break;
             }
         }
-        else if (parms.Length == 1 && parms[0].ToLower() == "start")
+        else if (parms.Length == 1 && parms[0].ToLower().Equals("start"))
         {
             yield return null;
             yield return new KMSelectable[] { buttons[0] };
         }
-        else if (parms.Length == 1 && parms[0].ToLower() == "reset")
+        else if (parms.Length == 1 && parms[0].ToLower().Equals("reset"))
         {
             yield return null;
             yield return new KMSelectable[] { buttons[1] };
@@ -1017,19 +1038,19 @@ public class robotProgrammingScript : MonoBehaviour
             var buttonsToPress = new List<KMSelectable>();
             foreach (string parm in parameters)
             {
-                if (parm.ToLower() == "l" || parm.ToLower() == "left")
+                if (parm.ToLower().Equals("l") || parm.ToLower().Equals("left"))
                 {
                     buttonsToPress.Add(arrowButtons[1]);
                 }
-                else  if (parm.ToLower() == "d" || parm.ToLower() == "down")
+                else  if (parm.ToLower().Equals("d") || parm.ToLower().Equals("down"))
                 {
                     buttonsToPress.Add(arrowButtons[0]);
                 }
-                else if (parm.ToLower() == "u" || parm.ToLower() == "up")
+                else if (parm.ToLower().Equals("u") || parm.ToLower().Equals("up"))
                 {
                     buttonsToPress.Add(arrowButtons[2]);
                 }
-                else if (parm.ToLower() == "r" || parm.ToLower() == "right")
+                else if (parm.ToLower().Equals("r") || parm.ToLower().Equals("right"))
                 {
                     buttonsToPress.Add(arrowButtons[3]);
                 }
