@@ -297,6 +297,10 @@ public class robotProgrammingScript : MonoBehaviour
 
     void moduleStriked()
     {
+        if (colorsBlocked.Contains(0) || colorsBlocked.Contains(1) || colorsBlocked.Contains(2) || colorsBlocked.Contains(3))
+        {
+            PickLEDcolor();
+        }
         r2d2movement = correctr2d2movement;
         fenderMovement = correctfenderMovement;
         moduleSolved = false;
@@ -553,15 +557,15 @@ public class robotProgrammingScript : MonoBehaviour
         {
             stuckCoordinates[i] = coordinates[i];
         }
+        for (int j = 0; j < 4; j++)
+        {
+            if (stuckCoordinates[j] <= 0)
+            {
+                stuckCoordinates[j] = 0;
+            }
+        }
         for (int i = 0; i < movement.Count(); i++)
         {
-            for(int j = 0; j < 4; j++)
-            {
-                if (stuckCoordinates[j] <= 0)
-                {
-                    stuckCoordinates[j] = 0;
-                }
-            }
             if (maze[stuckCoordinates[colorMovement[i]]] != 'X')
             {
                 if (movement[i] == (0))
@@ -580,6 +584,13 @@ public class robotProgrammingScript : MonoBehaviour
                 {
                     stuckCoordinates[colorMovement[i]] = stuckCoordinates[colorMovement[i]] + 1;
                 }
+            }
+        }
+        for (int j = 0; j < 4; j++)
+        {
+            if (stuckCoordinates[j] <= 0)
+            {
+                stuckCoordinates[j] = 0;
             }
         }
         if (stuckCoordinates[whichCoord] + stuckCoordNum < 0 || stuckCoordinates[whichCoord] + stuckCoordNum > 80)
@@ -611,10 +622,10 @@ public class robotProgrammingScript : MonoBehaviour
             {
                 GetComponent<KMAudio>().PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
                 pressedButtons.Add(pressedButton.name);
+                DebugMsg("You pressed " + pressedButton.name + ".");
                 for (int i = 0; i < 4; i++)
                 {
                     commandDisplay.text = "" + pressedButtons[pressedButtons.Count() - 3] + " " + pressedButtons[pressedButtons.Count() - 2] + " " + pressedButtons[pressedButtons.Count() - 1];
-                    DebugMsg("You pressed " + pressedButton.name + ".");
                     if (colorsTaken[i] == (ledIndex))
                     {
                         if (colorsTaken[i] == (0))
@@ -836,10 +847,6 @@ public class robotProgrammingScript : MonoBehaviour
             if (robotOrder[pyshicalMovement[calcNum]] == (3))
             {
                 fenderTracker++;
-                if (fenderTracker == (6))
-                {
-                    fenderTracker = 0;
-                }
             }
             if (movement[calcNum] == (0))
             {
@@ -865,8 +872,22 @@ public class robotProgrammingScript : MonoBehaviour
     {
         if (coordinates[colorMovement[calcNum]] < 0)
         {
-            correctr2d2movement = r2d2movement;
-            correctfenderMovement = fenderMovement;
+            if (movement[calcNum] == (0))
+            {
+                coordinates[colorMovement[calcNum]] = coordinates[colorMovement[calcNum]] - 9;
+            }
+            else if (movement[calcNum] == (1))
+            {
+                coordinates[colorMovement[calcNum]] = coordinates[colorMovement[calcNum]] + 1;
+            }
+            else if (movement[calcNum] == (2))
+            {
+                coordinates[colorMovement[calcNum]] = coordinates[colorMovement[calcNum]] + 9;
+            }
+            else if (movement[calcNum] == (3))
+            {
+                coordinates[colorMovement[calcNum]] = coordinates[colorMovement[calcNum]] - 1;
+            }
             moduleSolved = false;
             audio.PlaySoundAtTransform("strike", transform);
             DebugMsg("ERROR: Robot outside of boundries. Module striked.");
@@ -905,16 +926,12 @@ public class robotProgrammingScript : MonoBehaviour
                     r2d2movement = true;
                 }
             }
-            else if (robotOrder[pyshicalMovement[calcNum]] == (3))
+            if (robotOrder[pyshicalMovement[calcNum]] != (3))
             {
-                if (fenderTracker > 0)
-                {
-                    fenderTracker--;
-                }
-                fenderMovement = fenderTracker;
+                fenderTracker++;
             }
             correctr2d2movement = r2d2movement;
-            correctfenderMovement = fenderMovement;
+            correctfenderMovement = (fenderTracker - 1) % 6;
             r2d2tracker = 0;
             fenderTracker = 0;
             moduleSolved = false;
