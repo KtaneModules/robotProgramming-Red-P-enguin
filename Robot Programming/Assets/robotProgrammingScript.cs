@@ -297,18 +297,23 @@ public class robotProgrammingScript : MonoBehaviour
 
     void moduleStriked()
     {
-        if (colorsBlocked.Contains(0) || colorsBlocked.Contains(1) || colorsBlocked.Contains(2) || colorsBlocked.Contains(3))
+        for (int i = 0; i < 4; i++)
         {
-            PickLEDcolor();
+            DebugMsg("" + coordinates[i]);
         }
         r2d2movement = correctr2d2movement;
         fenderMovement = correctfenderMovement;
         moduleSolved = false;
         calcNum = 0;
-        colorsBlocked.Clear();
         movement.Clear();
         colorMovement.Clear();
         pyshicalMovement.Clear();
+        if (colorsBlocked.Contains(0) || colorsBlocked.Contains(1) || colorsBlocked.Contains(2) || colorsBlocked.Contains(3))
+        {
+            colorsBlocked.Clear();
+            PickLEDcolor();
+        }
+        colorsBlocked.Clear();
         return;
     }
 
