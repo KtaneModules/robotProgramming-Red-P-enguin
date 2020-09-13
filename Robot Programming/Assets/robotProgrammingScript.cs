@@ -566,7 +566,7 @@ public class robotProgrammingScript : MonoBehaviour
         {
             if (stuckCoordinates[j] <= 6 || stuckCoordinates[j] >= 56)
             {
-                stuckCoordinates[j] = 16;
+                stuckCoordinates[j] = 20;
             }
         }
         for (int i = 0; i < movement.Count(); i++)
@@ -595,7 +595,7 @@ public class robotProgrammingScript : MonoBehaviour
         {
             if (stuckCoordinates[j] <= 6 || stuckCoordinates[j] >= 56)
             {
-                stuckCoordinates[j] = 16;
+                stuckCoordinates[j] = 20;
             }
         }
         if (stuckCoordinates[whichCoord] + stuckCoordNum < 0 || stuckCoordinates[whichCoord] + stuckCoordNum > 80)
