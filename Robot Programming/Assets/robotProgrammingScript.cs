@@ -186,7 +186,7 @@ public class robotProgrammingScript : MonoBehaviour
     private string B6 ="XOXOXXXXX" +
                        "XOOOOOOOX" +
                        "XXXXXXXXX";
-    private string B7 ="XOXOXOXXX" +
+    private string B7 ="XOXOXXXXX" +
                        "XOOOOOOOX" +
                        "XXXXXXXXX";
     private string B8 ="XOXOXOXOX" +
@@ -564,9 +564,9 @@ public class robotProgrammingScript : MonoBehaviour
         }
         for (int j = 0; j < 4; j++)
         {
-            if (stuckCoordinates[j] <= 0)
+            if (stuckCoordinates[j] <= 6 || stuckCoordinates[j] >= 56)
             {
-                stuckCoordinates[j] = 0;
+                stuckCoordinates[j] = 16;
             }
         }
         for (int i = 0; i < movement.Count(); i++)
@@ -593,9 +593,9 @@ public class robotProgrammingScript : MonoBehaviour
         }
         for (int j = 0; j < 4; j++)
         {
-            if (stuckCoordinates[j] <= 0)
+            if (stuckCoordinates[j] <= 6 || stuckCoordinates[j] >= 56)
             {
-                stuckCoordinates[j] = 0;
+                stuckCoordinates[j] = 16;
             }
         }
         if (stuckCoordinates[whichCoord] + stuckCoordNum < 0 || stuckCoordinates[whichCoord] + stuckCoordNum > 80)
