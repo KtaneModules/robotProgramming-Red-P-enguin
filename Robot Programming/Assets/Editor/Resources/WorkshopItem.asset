@@ -13,4 +13,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   WorkshopPublishedFileID: 1840665855
   Title: Robot Programming
-  Tags: []
+  Tags:
+  - Regular Module

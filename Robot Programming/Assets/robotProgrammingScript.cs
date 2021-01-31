@@ -14,6 +14,7 @@ public class robotProgrammingScript : MonoBehaviour
     static int ModuleIdCounter = 1;
     int ModuleId;
     private bool moduleSolved = false;
+    private bool activated = false;
 
     public KMSelectable[] buttons;
     public KMSelectable[] arrowButtons;
@@ -67,7 +68,7 @@ public class robotProgrammingScript : MonoBehaviour
     private List<string> tops = new List<string>();
     private List<string> bottoms = new List<string>();
 
-    string[] validbtns = { "left", "up", "right", "down", "l", "u", "r", "d" };
+    string[] names = new string[] { "R.O.B", "HAL", "R2D2", "Fender" };
     string[] debugArrowNames = { "Down", "Left", "Up", "Right" };
     //tops
     private string T1 = "X1X2X3X4X" +
@@ -230,6 +231,7 @@ public class robotProgrammingScript : MonoBehaviour
             KMSelectable pressedButton = button;
             button.OnInteract += delegate () { buttonPressed(pressedButton); return false; };
         }
+        module.OnActivate += OnActivate;
     }
 
     void Start()
@@ -279,11 +281,15 @@ public class robotProgrammingScript : MonoBehaviour
         bottoms.Add(B14);
         bottoms.Add(B15);
         bottoms.Add(B16);
+        led.material = ledMats[4];
+        topText.gameObject.SetActive(false);
         index = UnityEngine.Random.Range(0, 16);
+        DebugMsg("Top of the maze is " + (index + 1) + ".");
         topDisplay.sprite = mazes[index];
         topText.text = "" + (index + 1);
         maze = tops[index];
         index = UnityEngine.Random.Range(0, 16);
+        DebugMsg("Bottom of the maze is " + (index + 1) + ".");
         bottomDisplay.sprite = mazes[index + 16];
         maze = maze + bottoms[index];
         coordinates.Add(64);
@@ -295,12 +301,15 @@ public class robotProgrammingScript : MonoBehaviour
         colorRobot();
     }
 
+    void OnActivate()
+    {
+        led.material = ledMats[0];
+        topText.gameObject.SetActive(true);
+        activated = true;
+    }
+
     void moduleStriked()
     {
-        for (int i = 0; i < 4; i++)
-        {
-            DebugMsg("" + coordinates[i]);
-        }
         r2d2movement = correctr2d2movement;
         fenderMovement = correctfenderMovement;
         moduleSolved = false;
@@ -319,13 +328,14 @@ public class robotProgrammingScript : MonoBehaviour
 
     void colorRobot()
     {
+        robotC:
         index = UnityEngine.Random.Range(0, 4);
         if (!colorsTaken.Contains(index))
         {
             colorsTaken.Add(index);
             if (colorsTaken.Count < 4)
             {
-                colorRobot();
+                goto robotC;
             }
             else
             {
@@ -334,12 +344,13 @@ public class robotProgrammingScript : MonoBehaviour
         }
         else
         {
-            colorRobot();
+            goto robotC;
         }
     }
 
     void posRobot()
     {
+        posRob:
         index = UnityEngine.Random.Range(0, 4);
         if (!posTaken.Contains(index))
         {
@@ -348,7 +359,7 @@ public class robotProgrammingScript : MonoBehaviour
             whichRobotNum++;
             if (posTaken.Count < 4)
             {
-                posRobot();
+                goto posRob;
             }
             else
             {
@@ -378,7 +389,7 @@ public class robotProgrammingScript : MonoBehaviour
         }
         else
         {
-            posRobot();
+            goto posRob;
         }
     }
 
@@ -387,12 +398,12 @@ public class robotProgrammingScript : MonoBehaviour
         // Red or Green in first pos
         if (colorsTaken[0] == (1) || colorsTaken[0] == (2))
         {
-            DebugMsg("Red or Lime is in first position. First condition applies.");
+            DebugMsg("Red or Green is in first position. First condition applies.");
             conditionsTrue.Add(1);
         }
         else
         {
-            DebugMsg("Red or Lime is not in first position. First condition doesn't apply.");
+            DebugMsg("Red or Green is not in first position. First condition doesn't apply.");
             conditionsTrue.Add(0);
         }
         // Hexagon is yellow
@@ -493,11 +504,19 @@ public class robotProgrammingScript : MonoBehaviour
                 }
             }
         }
+        string build = "";
+        for (int i = 0; i < 4; i++)
+        {
+            build += names[robotOrder[i]] + " ";
+        }
+        build = build.Trim();
+        DebugMsg("Positions of robots from left to right: " + build);
         PickLEDcolor();
     }
 
     void PickLEDcolor()
     {
+        ledCol:
         ledIndex++;
         if (ledIndex > 3)
         {
@@ -512,7 +531,7 @@ public class robotProgrammingScript : MonoBehaviour
                     i = 4;
                     if (isStuck(9, 3) && isStuck(-9, 3) && isStuck(1, 3) && isStuck(-1, 3))
                     {
-                        PickLEDcolor();
+                        goto ledCol;
                     }
                 }
                 else if (colorsTaken[i] == (1))
@@ -520,7 +539,7 @@ public class robotProgrammingScript : MonoBehaviour
                     i = 4;
                     if (isStuck(9, 2) && isStuck(-9, 2) && isStuck(1, 2) && isStuck(-1, 2))
                     {
-                        PickLEDcolor();
+                        goto ledCol;
                     }
                 }
                 else if (colorsTaken[i] == (2))
@@ -528,7 +547,7 @@ public class robotProgrammingScript : MonoBehaviour
                     i = 4;
                     if (isStuck(9, 0) && isStuck(-9, 0) && isStuck(1, 0) && isStuck(-1, 0))
                     {
-                        PickLEDcolor();
+                        goto ledCol;
                     }
                 }
                 else if (colorsTaken[i] == (3))
@@ -536,32 +555,36 @@ public class robotProgrammingScript : MonoBehaviour
                     i = 4;
                     if (isStuck(9, 1) && isStuck(-9, 1) && isStuck(1, 1) && isStuck(-1, 1))
                     {
-                        PickLEDcolor();
+                        goto ledCol;
                     }
                 }
             }
         }
         if (!colorsBlocked.Contains(ledIndex))
         {
-            led.material = ledMats[ledIndex];
+            if (activated)
+                led.material = ledMats[ledIndex];
         }
         else if (colorsBlocked.Contains(0) && colorsBlocked.Contains(1) && colorsBlocked.Contains(2) && colorsBlocked.Contains(3))
         {
-            led.material = ledMats[4];
+            if (activated)
+                led.material = ledMats[4];
         }
         else
         {
-            PickLEDcolor();
+            goto ledCol;
         }
         return;
     }
 
     private bool isStuck(int stuckCoordNum, int whichCoord)
     {
+        DebugMsgSilent("isStuck1 " + stuckCoordNum + " " + whichCoord);
         for (int i = 0; i < 4; i++)
         {
             stuckCoordinates[i] = coordinates[i];
         }
+        DebugMsgSilent("isStuck2 " + stuckCoordinates.Join(" "));
         for (int j = 0; j < 4; j++)
         {
             if (stuckCoordinates[j] <= 6 || stuckCoordinates[j] >= 56)
@@ -569,10 +592,13 @@ public class robotProgrammingScript : MonoBehaviour
                 stuckCoordinates[j] = 20;
             }
         }
+        DebugMsgSilent("isStuck3 " + stuckCoordinates.Join(" "));
         for (int i = 0; i < movement.Count(); i++)
         {
+            DebugMsgSilent("isStuck4 " + i + " " + stuckCoordinates[colorMovement[i]]);
             if (maze[stuckCoordinates[colorMovement[i]]] != 'X')
             {
+                DebugMsgSilent("isStuck5 " + movement[i] + " " + colorMovement[i]);
                 if (movement[i] == (0))
                 {
                     stuckCoordinates[colorMovement[i]] = stuckCoordinates[colorMovement[i]] + 9;
@@ -591,6 +617,7 @@ public class robotProgrammingScript : MonoBehaviour
                 }
             }
         }
+        DebugMsgSilent("isStuck6 " + stuckCoordinates.Join(" "));
         for (int j = 0; j < 4; j++)
         {
             if (stuckCoordinates[j] <= 6 || stuckCoordinates[j] >= 56)
@@ -598,16 +625,21 @@ public class robotProgrammingScript : MonoBehaviour
                 stuckCoordinates[j] = 20;
             }
         }
+        DebugMsgSilent("isStuck7 " + stuckCoordinates.Join(" "));
         if (stuckCoordinates[whichCoord] + stuckCoordNum < 0 || stuckCoordinates[whichCoord] + stuckCoordNum > 80)
         {
+            DebugMsgSilent("isStuck returns true");
             return true;
         }
+        DebugMsgSilent("isStuck8 " + (stuckCoordinates[whichCoord] + stuckCoordNum));
         if ((stuckCoordinates[whichCoord] + stuckCoordNum) == (stuckCoordinates[0]) || (stuckCoordinates[whichCoord] + stuckCoordNum) == (stuckCoordinates[1]) || (stuckCoordinates[whichCoord] + stuckCoordNum) == (stuckCoordinates[2]) || (stuckCoordinates[whichCoord] + stuckCoordNum) == (stuckCoordinates[3]) || maze[stuckCoordinates[whichCoord] + stuckCoordNum] == ('X'))
         {
+            DebugMsgSilent("isStuck returns true");
             return true;
         }
         else
         {
+            DebugMsgSilent("isStuck returns false");
             return false;
         }
     }
@@ -617,7 +649,7 @@ public class robotProgrammingScript : MonoBehaviour
         bottomText.text = "";
         commandDisplay.text = "";
         pressedButton.AddInteractionPunch();
-        if (moduleSolved)
+        if (moduleSolved || !activated)
         {
             return;
         }
@@ -625,7 +657,7 @@ public class robotProgrammingScript : MonoBehaviour
         {
             if (arrowButtons.Contains(pressedButton))
             {
-                GetComponent<KMAudio>().PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, transform);
+                GetComponent<KMAudio>().PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, pressedButton.transform);
                 pressedButtons.Add(pressedButton.name);
                 DebugMsg("You pressed " + pressedButton.name + ".");
                 for (int i = 0; i < 4; i++)
@@ -793,17 +825,20 @@ public class robotProgrammingScript : MonoBehaviour
             }
             else if(pressedButton == (buttons[1]))
             {
+                DebugMsg("Command sequence reset.");
                 moduleStriked();
                 commandDisplay.text = "RESET";
                 Invoke("strikedDisplay", 1);
             }
             else if (pressedButton == (buttons[0]))
             {
+                DebugMsg("Running chain of commands.");
                 moduleSolved = true;
                 calculatingMovement();
             }
             else if (pressedButton == (buttons[2]))
             {
+                DebugMsg(names[colorsTaken[robotOrder.IndexOf(0)]] + " will no longer receive commands.");
                 colorsBlocked.Add(0);
                 if(ledIndex == (0))
                 {
@@ -812,6 +847,7 @@ public class robotProgrammingScript : MonoBehaviour
             }
             else if (pressedButton == (buttons[3]))
             {
+                DebugMsg(names[colorsTaken[robotOrder.IndexOf(1)]] + " will no longer receive commands.");
                 colorsBlocked.Add(1);
                 if (ledIndex == (1))
                 {
@@ -820,6 +856,7 @@ public class robotProgrammingScript : MonoBehaviour
             }
             else if (pressedButton == (buttons[4]))
             {
+                DebugMsg(names[colorsTaken[robotOrder.IndexOf(2)]] + " will no longer receive commands.");
                 colorsBlocked.Add(2);
                 if (ledIndex == (2))
                 {
@@ -828,6 +865,7 @@ public class robotProgrammingScript : MonoBehaviour
             }
             else if (pressedButton == (buttons[5]))
             {
+                DebugMsg(names[colorsTaken[robotOrder.IndexOf(3)]] + " will no longer receive commands.");
                 colorsBlocked.Add(3);
                 if (ledIndex == (3))
                 {
@@ -896,6 +934,21 @@ public class robotProgrammingScript : MonoBehaviour
             moduleSolved = false;
             audio.PlaySoundAtTransform("strike", transform);
             DebugMsg("ERROR: Robot outside of boundries. Module striked.");
+            char[] order = new char[] { 'R', 'Y', 'G', 'B' };
+            string build = "";
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    if (regMats[colorsTaken[i]].name[0] == order[j])
+                    {
+                        build += coordinates[j] + " ";
+                        break;
+                    }
+                }
+            }
+            build = build.Trim();
+            DebugMsg("ERROR: Robots' coordinates before strike: " + build);
             commandDisplay.text = "OOB";
             GetComponent<KMBombModule>().HandleStrike();
             Invoke("moduleStriked", 1);
@@ -943,10 +996,24 @@ public class robotProgrammingScript : MonoBehaviour
             audio.PlaySoundAtTransform("strike", transform);
             DebugMsg("ERROR: Robot crashed. Module striked.");
             DebugMsg("ERROR: Successful movements: " + calcNum);
+            char[] order = new char[] { 'R', 'Y', 'G', 'B' };
+            string build = "";
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    if (regMats[colorsTaken[i]].name[0] == order[j])
+                    {
+                        build += coordinates[j] + " ";
+                        break;
+                    }
+                }
+            }
+            build = build.Trim();
+            DebugMsg("ERROR: Robots' coordinates before strike: " + build);
             commandDisplay.text = "CRASHED";
             GetComponent<KMBombModule>().HandleStrike();
             Invoke("moduleStriked", 1);
-            moduleStriked();
             strikedDisplay();
         }
         else
@@ -992,6 +1059,21 @@ public class robotProgrammingScript : MonoBehaviour
             moduleSolved = false;
             audio.PlaySoundAtTransform("strike", transform);
             DebugMsg("ERROR: Out of commands. Module striked.");
+            char[] order = new char[] { 'R', 'Y', 'G', 'B' };
+            string build = "";
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    if (regMats[colorsTaken[i]].name[0] == order[j])
+                    {
+                        build += coordinates[j] + " ";
+                        break;
+                    }
+                }
+            }
+            build = build.Trim();
+            DebugMsg("ERROR: Robots' coordinates before strike: " + build);
             commandDisplay.text = "OOC";
             GetComponent<KMBombModule>().HandleStrike();
             Invoke("moduleStriked", 1);
@@ -1089,5 +1171,10 @@ public class robotProgrammingScript : MonoBehaviour
     void DebugMsg(string msg)
     {
         Debug.LogFormat("[Robot Programming #{0}] {1}", ModuleId, msg);
+    }
+
+    void DebugMsgSilent(string msg)
+    {
+        Debug.LogFormat("<Robot Programming #{0}> {1}", ModuleId, msg);
     }
 }
