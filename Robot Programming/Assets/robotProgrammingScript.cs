@@ -526,6 +526,7 @@ public class robotProgrammingScript : MonoBehaviour
         {
             if (colorsTaken[i] == (ledIndex))
             {
+                setStuckCoords();
                 if (colorsTaken[i] == (0))
                 {
                     i = 4;
@@ -577,28 +578,18 @@ public class robotProgrammingScript : MonoBehaviour
         return;
     }
 
-    private bool isStuck(int stuckCoordNum, int whichCoord)
+    private void setStuckCoords()
     {
-        DebugMsgSilent("isStuck1 " + stuckCoordNum + " " + whichCoord);
         for (int i = 0; i < 4; i++)
         {
             stuckCoordinates[i] = coordinates[i];
         }
-        DebugMsgSilent("isStuck2 " + stuckCoordinates.Join(" "));
-        for (int j = 0; j < 4; j++)
-        {
-            if (stuckCoordinates[j] <= 6 || stuckCoordinates[j] >= 56)
-            {
-                stuckCoordinates[j] = 20;
-            }
-        }
-        DebugMsgSilent("isStuck3 " + stuckCoordinates.Join(" "));
         for (int i = 0; i < movement.Count(); i++)
         {
-            DebugMsgSilent("isStuck4 " + i + " " + stuckCoordinates[colorMovement[i]]);
+            if (stuckCoordinates[colorMovement[i]] < 0)
+                continue;
             if (maze[stuckCoordinates[colorMovement[i]]] != 'X')
             {
-                DebugMsgSilent("isStuck5 " + movement[i] + " " + colorMovement[i]);
                 if (movement[i] == (0))
                 {
                     stuckCoordinates[colorMovement[i]] = stuckCoordinates[colorMovement[i]] + 9;
@@ -617,29 +608,20 @@ public class robotProgrammingScript : MonoBehaviour
                 }
             }
         }
-        DebugMsgSilent("isStuck6 " + stuckCoordinates.Join(" "));
-        for (int j = 0; j < 4; j++)
-        {
-            if (stuckCoordinates[j] <= 6 || stuckCoordinates[j] >= 56)
-            {
-                stuckCoordinates[j] = 20;
-            }
-        }
-        DebugMsgSilent("isStuck7 " + stuckCoordinates.Join(" "));
+    }
+
+    private bool isStuck(int stuckCoordNum, int whichCoord)
+    {
         if (stuckCoordinates[whichCoord] + stuckCoordNum < 0 || stuckCoordinates[whichCoord] + stuckCoordNum > 80)
         {
-            DebugMsgSilent("isStuck returns true");
             return true;
         }
-        DebugMsgSilent("isStuck8 " + (stuckCoordinates[whichCoord] + stuckCoordNum));
         if ((stuckCoordinates[whichCoord] + stuckCoordNum) == (stuckCoordinates[0]) || (stuckCoordinates[whichCoord] + stuckCoordNum) == (stuckCoordinates[1]) || (stuckCoordinates[whichCoord] + stuckCoordNum) == (stuckCoordinates[2]) || (stuckCoordinates[whichCoord] + stuckCoordNum) == (stuckCoordinates[3]) || maze[stuckCoordinates[whichCoord] + stuckCoordNum] == ('X'))
         {
-            DebugMsgSilent("isStuck returns true");
             return true;
         }
         else
         {
-            DebugMsgSilent("isStuck returns false");
             return false;
         }
     }
@@ -1171,10 +1153,5 @@ public class robotProgrammingScript : MonoBehaviour
     void DebugMsg(string msg)
     {
         Debug.LogFormat("[Robot Programming #{0}] {1}", ModuleId, msg);
-    }
-
-    void DebugMsgSilent(string msg)
-    {
-        Debug.LogFormat("<Robot Programming #{0}> {1}", ModuleId, msg);
     }
 }
