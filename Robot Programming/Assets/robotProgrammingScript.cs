@@ -184,10 +184,10 @@ public class robotProgrammingScript : MonoBehaviour
     private string B5 ="XOXOXXXXX" +
                        "XOOOOOOOX" +
                        "XXXXXXXXX";
-    private string B6 ="XOXOXXXXX" +
+    private string B6 ="XOXOXOXXX" +
                        "XOOOOOOOX" +
                        "XXXXXXXXX";
-    private string B7 ="XOXOXXXXX" +
+    private string B7 ="XOXOXOXXX" +
                        "XOOOOOOOX" +
                        "XXXXXXXXX";
     private string B8 ="XOXOXOXOX" +
