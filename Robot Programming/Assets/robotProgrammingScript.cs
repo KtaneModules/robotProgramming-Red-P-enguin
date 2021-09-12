@@ -13,6 +13,7 @@ public class robotProgrammingScript : MonoBehaviour
 
     static int ModuleIdCounter = 1;
     int ModuleId;
+    private bool moduleRunning = false;
     private bool moduleSolved = false;
     private bool activated = false;
 
@@ -312,7 +313,7 @@ public class robotProgrammingScript : MonoBehaviour
     {
         r2d2movement = correctr2d2movement;
         fenderMovement = correctfenderMovement;
-        moduleSolved = false;
+        moduleRunning = false;
         calcNum = 0;
         movement.Clear();
         colorMovement.Clear();
@@ -631,7 +632,7 @@ public class robotProgrammingScript : MonoBehaviour
         bottomText.text = "";
         commandDisplay.text = "";
         pressedButton.AddInteractionPunch();
-        if (moduleSolved || !activated)
+        if (moduleRunning || !activated)
         {
             return;
         }
@@ -639,7 +640,7 @@ public class robotProgrammingScript : MonoBehaviour
         {
             if (arrowButtons.Contains(pressedButton))
             {
-                GetComponent<KMAudio>().PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, pressedButton.transform);
+                audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, pressedButton.transform);
                 pressedButtons.Add(pressedButton.name);
                 DebugMsg("You pressed " + pressedButton.name + ".");
                 for (int i = 0; i < 4; i++)
@@ -815,7 +816,7 @@ public class robotProgrammingScript : MonoBehaviour
             else if (pressedButton == (buttons[0]))
             {
                 DebugMsg("Running chain of commands.");
-                moduleSolved = true;
+                moduleRunning = true;
                 calculatingMovement();
             }
             else if (pressedButton == (buttons[2]))
@@ -913,9 +914,8 @@ public class robotProgrammingScript : MonoBehaviour
             {
                 coordinates[colorMovement[calcNum]] = coordinates[colorMovement[calcNum]] - 1;
             }
-            moduleSolved = false;
             audio.PlaySoundAtTransform("strike", transform);
-            DebugMsg("ERROR: Robot outside of boundries. Module striked.");
+            DebugMsg("ERROR: Robot outside of boundaries. Module striked.");
             char[] order = new char[] { 'R', 'Y', 'G', 'B' };
             string build = "";
             for (int i = 0; i < 4; i++)
@@ -932,7 +932,7 @@ public class robotProgrammingScript : MonoBehaviour
             build = build.Trim();
             DebugMsg("ERROR: Robots' coordinates before strike: " + build);
             commandDisplay.text = "OOB";
-            GetComponent<KMBombModule>().HandleStrike();
+            module.HandleStrike();
             Invoke("moduleStriked", 1);
             strikedDisplay();
         }
@@ -974,7 +974,6 @@ public class robotProgrammingScript : MonoBehaviour
             correctfenderMovement = (fenderTracker - 1) % 6;
             r2d2tracker = 0;
             fenderTracker = 0;
-            moduleSolved = false;
             audio.PlaySoundAtTransform("strike", transform);
             DebugMsg("ERROR: Robot crashed. Module striked.");
             DebugMsg("ERROR: Successful movements: " + calcNum);
@@ -994,7 +993,7 @@ public class robotProgrammingScript : MonoBehaviour
             build = build.Trim();
             DebugMsg("ERROR: Robots' coordinates before strike: " + build);
             commandDisplay.text = "CRASHED";
-            GetComponent<KMBombModule>().HandleStrike();
+            module.HandleStrike();
             Invoke("moduleStriked", 1);
             strikedDisplay();
         }
@@ -1032,13 +1031,14 @@ public class robotProgrammingScript : MonoBehaviour
         {
             audio.PlaySoundAtTransform("solve", transform);
             DebugMsg("Program run successfully. Module solved.");
-            GetComponent<KMBombModule>().HandlePass();
+            module.HandlePass();
+            moduleRunning = false;
+            moduleSolved = true;
         }
         else
         {
             correctr2d2movement = r2d2movement;
             correctfenderMovement = fenderMovement;
-            moduleSolved = false;
             audio.PlaySoundAtTransform("strike", transform);
             DebugMsg("ERROR: Out of commands. Module striked.");
             char[] order = new char[] { 'R', 'Y', 'G', 'B' };
@@ -1057,7 +1057,7 @@ public class robotProgrammingScript : MonoBehaviour
             build = build.Trim();
             DebugMsg("ERROR: Robots' coordinates before strike: " + build);
             commandDisplay.text = "OOC";
-            GetComponent<KMBombModule>().HandleStrike();
+            module.HandleStrike();
             Invoke("moduleStriked", 1);
             strikedDisplay();
         }
@@ -1066,7 +1066,7 @@ public class robotProgrammingScript : MonoBehaviour
     void strikedDisplay()
     {
         commandDisplay.text = "" + regMats[colorsTaken[0]].name[0] + regMats[colorsTaken[1]].name[0] + regMats[colorsTaken[2]].name[0] + regMats[colorsTaken[3]].name[0] + " " + (fenderMovement + 1);
-        if(r2d2movement == (false))
+        if (r2d2movement == (false))
         {
             bottomText.text = "R.O.B";
         }
@@ -1076,7 +1076,7 @@ public class robotProgrammingScript : MonoBehaviour
         }
     }
 
-    public string TwitchHelpMessage = "Use !{0} press left to press the left button. (Valid buttons are left, right, up, down). Use !{0} block blue/red/green/yellow to block that color. Use !{0} start to start the program. Use !{0} reset to reset the program.";
+    public string TwitchHelpMessage = "!{0} left/right/up/down | !{0} block blue/red/green/yellow | !{0} start | !{0} reset";
     IEnumerator ProcessTwitchCommand(string cmd)
     {
         var parms = cmd.ToLowerInvariant().Split(new[] { ' ' });
@@ -1128,7 +1128,7 @@ public class robotProgrammingScript : MonoBehaviour
                 {
                     buttonsToPress.Add(arrowButtons[1]);
                 }
-                else  if (parm.ToLower().Equals("d") || parm.ToLower().Equals("down"))
+                else if (parm.ToLower().Equals("d") || parm.ToLower().Equals("down"))
                 {
                     buttonsToPress.Add(arrowButtons[0]);
                 }
@@ -1148,6 +1148,128 @@ public class robotProgrammingScript : MonoBehaviour
             yield return null;
             yield return buttonsToPress;
         }
+    }
+
+    IEnumerator TwitchHandleForcedSolve()
+    {
+        if (moduleSolved)
+            yield break;
+
+        // Wait if the module is currently in the middle of executing a run
+        if (moduleRunning)
+        {
+            while (moduleRunning)
+                yield return true;
+
+            // Even after setting moduleRunning to false, the module still waits a while before resetting internal variables
+            yield return new WaitForSeconds(1f);
+
+            if (moduleSolved)
+                yield break;
+        }
+
+        buttons[1].OnInteract();    // reset button
+        yield return new WaitForSeconds(.1f);
+
+        var sn = bomb.GetSerialNumber();
+        var solution = FindPath(new[] { 3, 2, 0, 1 }.Select(ix => coordinates[ix]).ToArray(), ledIndex);
+        while (solution.Count > 0)
+        {
+            var commandIx = solution.FindIndex(v => (v & 0x3) == ledIndex);
+            var command = solution[commandIx] >> 2;
+            KMSelectable btn;
+            if (command == 4)
+            {
+                btn = buttons[2 + ledIndex];
+            }
+            else
+            {
+                var robotPersonality = robotOrder[colorsTaken.IndexOf(ledIndex)];   // 0 = ROB, 1 = HAL, 2 = R2D2, 3 = Fender
+                var correctButton = robotPersonality == 0 ||
+                    (robotPersonality == 2 && !r2d2movement) ||
+                    (robotPersonality == 3 && char.IsDigit(sn[fenderMovement]));
+                btn = arrowButtons[correctButton ? command : (command + 2) % 4];
+            }
+            btn.OnInteract();
+            yield return new WaitForSeconds(.1f);
+            solution.RemoveAt(commandIx);
+        }
+
+        buttons[0].OnInteract();    // start
+        yield return new WaitForSeconds(.1f);
+
+        while (!moduleSolved)
+            yield return true;
+    }
+
+    string coord(int location)
+    {
+        return string.Format("{0}{1}", (char) ('A' + location % 9), location / 9 + 1);
+    }
+
+    private List<int> FindPath(int[] startPositions, int startRobot)
+    {
+        var ds = new[] { 9, -1, -9, 1, 0 };
+        var q = new Queue<ulong>();
+
+        ulong startCode = (ulong) (startPositions[0] | (startPositions[1] << 7) | (startPositions[2] << 14) | (startPositions[3] << 21) | (startRobot << 28));
+        const ulong coordinatesMask = (1 << 28) - 1;
+        const ulong singleCoordinateMask = (1 << 7) - 1;
+
+        var cameFrom = new Dictionary<ulong, ulong>();
+        var directionsFrom = new Dictionary<ulong, int>();
+        ulong endCode = ulong.MaxValue;
+        q.Enqueue(startCode);
+
+        while (q.Count > 0)
+        {
+            var code = q.Dequeue();
+            if (Enumerable.Range(0, 4).All(robotIx => ((code >> (7 * robotIx)) & 0x7f) / 9 == 0))
+            {
+                endCode = code;
+                break;
+            }
+
+            var curRobot = (int) ((code >> 28) & 0x3);
+            var curCoordinate = (int) ((code >> (7 * curRobot)) & 0x7f);
+
+            foreach (var d in ds)
+            {
+                if ((maze[curCoordinate] == "4312"[curRobot]) != (d == 0))
+                    continue;
+
+                var newCoordinate = curCoordinate + d;
+                if (maze[newCoordinate] != 'O' && maze[newCoordinate] != "4312"[curRobot])
+                    continue;
+                if (Enumerable.Range(0, 4).Any(otherRobot => otherRobot != curRobot && (int) ((code >> (7 * otherRobot)) & 0x7f) == newCoordinate))
+                    continue;
+
+                var newRobot = (curRobot + 1) % 4;
+                while ((code & (1ul << (30 + newRobot))) != 0)
+                    newRobot = (newRobot + 1) % 4;
+                var newCode = (((code & ~(singleCoordinateMask << (7 * curRobot))) | ((ulong) newCoordinate << (7 * curRobot))) & coordinatesMask) | ((ulong) newRobot << 28) | ((code >> 30) << 30);
+                if (d == 0)
+                    newCode |= 1ul << (30 + curRobot);
+                if (!cameFrom.ContainsKey(newCode))
+                {
+                    cameFrom[newCode] = code;
+                    directionsFrom[newCode] = Array.IndexOf(ds, d);
+                    q.Enqueue(newCode);
+                }
+            }
+        }
+
+        var commands = new List<int>();
+        var robots = new List<int>();
+        var curCode = endCode;
+        while (curCode != startCode)
+        {
+            var dir = directionsFrom[curCode];
+            curCode = cameFrom[curCode];
+            commands.Add((dir << 2) | ((int) (curCode >> 28) & 0x3));
+        }
+        commands.Reverse();
+        return commands;
     }
 
     void DebugMsg(string msg)
