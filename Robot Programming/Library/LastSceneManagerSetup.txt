@@ -1,4 +1,0 @@
-sceneSetups:
-- path: Assets/uwu.unity
-  isLoaded: 1
-  isActive: 1
