@@ -17,7 +17,7 @@ MonoBehaviour:
   description: "--\nEvery kids fantasy job is now your adult nightmare. Just try not
     to \u2018crash\u2019 the program.\n\nModule Name: Robot Programming\nModule ID:
     robotProgramming\nDeveloper: Red Penguin\nIdea & manual creator : MarioXTurn\nTP
-    Autosolver : Timwi\nPlaytesters: tandyCake, MarioXTurn, XMaster, Shaun/Sean\n\nManual:
+    Autosolver : Timwi\nPlaytesters: tandyCake, MarioXTurn, XMaster, Sean\n\nManual:
     https://ktane.timwi.de/HTML/Robot%20Programming.html\n--"
   version: 2
   outputFolder: build

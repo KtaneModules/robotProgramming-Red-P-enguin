@@ -694,10 +694,14 @@ public class robotProgramming : MonoBehaviour {
     {
         Up, Right, Down, Left, Block, Reset, Start, Colorblind
     }
+    bool executingCommands;
     public string TwitchHelpMessage = "\"!{0} left/right/up/down/l/r/u/d\" to press that button. \"!{0} block red/yellow/green/blue/r/y/g/b\" to block that color. \"!{0} reset\" to reset the program. \"!{0} start\" to start the program. \"!{0} colorblind\" to toggle colorblind.";
     IEnumerator ProcessTwitchCommand(string cmd)
     {
         var commands = cmd.ToLowerInvariant().Split(new[] { ' ' });
+
+        while (executingCommands) { yield return new WaitForSeconds(1f); }
+        print(executingCommands + " executing");
 
         Queue<Input> inputs = new Queue<Input>();
         Queue<RobotColor> blocks = new Queue<RobotColor>();
@@ -722,7 +726,7 @@ public class robotProgramming : MonoBehaviour {
                     inputs.Enqueue(Input.Left);
                     break;
                 case "reset":
-                    inputs.Clear(); //since they will all be ignored by the reset anyway
+                    //inputs.Clear(); //since they will all be ignored by the reset anyway
                     inputs.Enqueue(Input.Reset);
                     break;
                 case "start":
@@ -768,6 +772,8 @@ public class robotProgramming : MonoBehaviour {
                 case "colorblind":
                     toggleColorblind();
                     break;
+                case "": //prevent null commands from breaking things. this is sloppy but thog dont caare
+                    break;
                 default:
                     yield return ("sendtochaterror \"" + commands[i] + "\" is an improper command.");
                     inputs.Clear();
@@ -778,7 +784,6 @@ public class robotProgramming : MonoBehaviour {
 
         if(inputs.Count > 0)
         {
-            print("yeah");
             while (currentlyAnimating)
                 yield return true;
             
@@ -793,6 +798,7 @@ public class robotProgramming : MonoBehaviour {
 
     IEnumerator executeCommands(Queue<Input> inputs, Queue<RobotColor> blockedColors)
     {
+        executingCommands = true;
         while(inputs.Count > 0)
         {
             Input input = inputs.Dequeue();
@@ -826,6 +832,8 @@ public class robotProgramming : MonoBehaviour {
             yield return new WaitForSeconds(.1f);
         }
 
+        print("I'm done");
+        executingCommands = false;
         yield break;
     }
 
