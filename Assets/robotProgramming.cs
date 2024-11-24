@@ -836,4 +836,195 @@ public class robotProgramming : MonoBehaviour
     {
         return $"{robot.Color} {robot.Shape}";
     }
+
+    // Twitch Plays auto-solver
+    IEnumerator TwitchHandleForcedSolve()
+    {
+        while (currentlyAnimating)
+            yield return true;
+
+        if (moduleSolved)
+            yield break;
+
+        resetButton.OnInteract();
+        yield return new WaitForSeconds(.1f);
+
+        // Generate the solution. See FindPath for full explanation.
+        var solution = FindPath(sortedRobots.Select(robot => robot.InitialPosition.y * 9 + robot.InitialPosition.x).ToArray());
+
+        // Variables to keep track of R2D2 and Fender
+        var r2d2IsRob = true;
+        var sn = bomb.GetSerialNumber();
+        var fenderMovement = 0;
+
+        // In the majority of cases, we will just execute the commands from start to finish.
+        // However, in some cases, a robot’s movement is restricted by the presence of other robots.
+        // In such a case, the module will skip that robot’s color, so we have to skip it too.
+        // Therefore, at each iteration, we find the earliest command for the robot that is currently waiting for input.
+        while (solution.Count > 0)
+        {
+            // FindPath returns values that consist of the robot color (lowest two bits) and the command (rest of the bits).
+            // Find index of earliest command of the desired robot color (lowest two bits), then extract the command (by shifting the robot color out).
+            var commandIx = solution.FindIndex(v => (v & 0x3) == (int) notBlockedColors[currentColorIndex]);
+            var command = solution[commandIx] >> 2;
+
+            KMSelectable btn;
+            if (command == 4)
+                btn = blockButtons[(int) notBlockedColors[currentColorIndex]];
+            else
+            {
+                // Determine whether we need to press the correct or the opposite button
+                var robotPersonality = sortedRobots[(int) notBlockedColors[currentColorIndex]].Type;
+                var correctButton = robotPersonality == Type.ROB;
+                switch (robotPersonality)
+                {
+                    case Type.R2D2:
+                        correctButton = r2d2IsRob;
+                        r2d2IsRob = !r2d2IsRob;
+                        break;
+                    case Type.Fender:
+                        correctButton = char.IsDigit(sn[fenderMovement]);
+                        fenderMovement = (fenderMovement + 1) % 6;
+                        break;
+                }
+
+                // Press the appropriate button
+                btn = arrowButtons[correctButton ? command : (command + 2) % 4];
+            }
+            btn.OnInteract();
+            yield return new WaitForSeconds(.1f);
+            solution.RemoveAt(commandIx);
+        }
+
+        startButton.OnInteract();
+        yield return new WaitForSeconds(.1f);
+
+        while (!moduleSolved)
+            yield return true;
+    }
+
+    // Takes a list of robot starting positions (in the order B G R Y) and returns a possible solution that will navigate them all to their goal.
+    // The returned integers consist of a robot color (lowest two bits) and a command (rest). Commands are Up, Right, Down, Left, or Block.
+    private List<int> FindPath(int[] startPositions)
+    {
+        // Throughout this algorithm:
+        //  • The robots are always considered to be in the order B G R Y. Robot #0 is always the blue one, etc.
+        //  • The module variable ‘maze’ is re-used to determine the maze geometry and the positions of the goals.
+        //  • Coordinates (positions in the 9×9 maze) are stored as values 0–80, or equivalently, as x + 9*y.
+        //    Thus, X and Y coordinates are extracted from a coordinate C as X = C % 9 and Y = C / 9.
+        //  • A single integer, called a “code”, is used to represent the entire game state:
+        //      YRGBNNYYYYYYYRRRRRRRGGGGGGGBBBBBBB
+        //      └─┬┘└┤└──┬──┘└──┬──┘└──┬──┘└──┬──┘
+        //        │  │ Y pos  R pos  G pos  B pos
+        //        │  │ (7 b)  (7 b)  (7 b)  (7 b)
+        //        │  └─▶ which robot’s turn it is (2 bits)
+        //        └─▶ which robots have already been blocked (4 bits)
+        //    Since such a code uses more than 32 bits, we use a ulong to store it.
+
+        // For each of the five possible actions (up, right, down, left, block), this is the amount by which a robot’s coordinate changes.
+        // Ordinarily this would be incorrect when at the edge of the maze, but in our case, the maze is entirely cordoned off with walls
+        // and the top row contains the goals, so no robot will move off the edge at any point.
+        var ds = new[] { -9, 1, 9, -1, 0 };
+
+        // Calculates the starting code. Since only the start positions are placed, everything else is 0: it will be robot #0’s turn and no robots are blocked.
+        ulong startCode = (ulong) (startPositions[0] | (startPositions[1] << 7) | (startPositions[2] << 14) | (startPositions[3] << 21));
+
+        // START OF BREADTH-FIRST SEARCH ALGORITHM
+
+        // Queue to contain all the game states (“codes”) yet to be examined. Start with only the starting code;
+        // then each iteration will add all codes that are reachable by one move, etc. until a code is found that solves the module.
+        var q = new Queue<ulong>();
+        q.Enqueue(startCode);
+
+        // For each code we discovered, remember which code it was generated from and which command was executed to get there.
+        var cameFrom = new Dictionary<ulong, ulong>();
+        var commandsFrom = new Dictionary<ulong, int>();
+
+        // This variable remembers the code of the goal state when we find it.
+        // The value assigned here is never used unless there’s a bug, in which case this value guarantees an exception (as opposed to erratic behaviour)
+        ulong endCode = ulong.MaxValue;
+
+        while (q.Count > 0)
+        {
+            // LOOP ITERATION:
+            // Look at a code from the queue, generate all codes reachable by one command and put them in the queue
+
+            // Step 1: take a code from the queue and calculate which robot’s turn it is and where it is
+            var code = q.Dequeue();
+            var curRobot = (int) ((code >> 28) & 0x3);
+            var curCoordinate = (int) ((code >> (7 * curRobot)) & 0x7F);
+
+            // For each possible command...
+            foreach (var d in ds)
+            {
+                // Do a “block” command (d = 0) IF AND ONLY IF the current robot is on its goal position
+                if ((d == 0) != (maze[curCoordinate / 9][curCoordinate % 9] == "bgry"[curRobot]))
+                    continue;
+
+                var newCoordinate = curCoordinate + d;
+                // Only consider this command if it takes the robot into an empty space or its own goal (i.e., not a wall and not another robot’s goal)
+                if (maze[newCoordinate / 9][newCoordinate % 9] != '.' && maze[newCoordinate / 9][newCoordinate % 9] != "bgry"[curRobot])
+                    continue;
+                // Only consider this command if it doesn’t cause the robot to crash into another robot
+                if (Enumerable.Range(0, 4).Any(otherRobot => otherRobot != curRobot && (int) ((code >> (7 * otherRobot)) & 0x7F) == newCoordinate))
+                    continue;
+
+                // Calculate whose turn it is next (skip robots that are already blocked)
+                var newRobot = (curRobot + 1) % 4;
+                while ((code & (1ul << (30 + newRobot))) != 0)
+                    newRobot = (newRobot + 1) % 4;
+
+                // Calculate the new code by:
+                var newCode =
+                    // — changing the current robot’s position
+                    (((code & ~(0x7Ful << (7 * curRobot))) | ((ulong) newCoordinate << (7 * curRobot))) & 0xFFFFFFFul) |
+                    // — updating whose turn it is
+                    ((ulong) newRobot << 28) |
+                    // — keeping the information on which robots are blocked
+                    ((code >> 30) << 30);
+                if (d == 0)
+                    // — blocking the current robot if that’s what we’re doing
+                    newCode |= 1ul << (30 + curRobot);
+
+                // Only consider this command if it takes us to a new code we haven’t already seen
+                if (!cameFrom.ContainsKey(newCode))
+                {
+                    cameFrom[newCode] = code;
+                    commandsFrom[newCode] = Array.IndexOf(ds, d);
+
+                    // If every robot is in the top row (Y coordinate = 0), consider this the solved state
+                    if (Enumerable.Range(0, 4).All(robotIx => ((newCode >> (7 * robotIx)) & 0x7F) / 9 == 0))
+                    {
+                        endCode = newCode;
+                        goto found;
+                    }
+
+                    // Otherwise, remember this new code in the queue and come back to it later to explore further
+                    q.Enqueue(newCode);
+                }
+            }
+        }
+
+        found:
+        // We found a solution! At this point, we know:
+        //  • what the final code is (‘endCode’)
+        //  • what earlier code each code was generated from and which command was executed to get there
+        // So we start with the final code and reconstruct how we got there by iteratively tracing it back to the starting position (‘startCode’).
+
+        var commands = new List<int>();
+        var robots = new List<int>();
+        var curCode = endCode;
+        while (curCode != startCode)
+        {
+            var cmd = commandsFrom[curCode];
+            curCode = cameFrom[curCode];
+
+            // Add an integer consisting of the robot (bottom two bits) and the command (rest)
+            commands.Add((cmd << 2) | ((int) (curCode >> 28) & 0x3));
+        }
+
+        // Since we went from the final position to the starting position, the commands are in reverse order, so reverse them back.
+        commands.Reverse();
+        return commands;
+    }
 }
