@@ -1012,7 +1012,6 @@ public class robotProgramming : MonoBehaviour
         // So we start with the final code and reconstruct how we got there by iteratively tracing it back to the starting position (‘startCode’).
 
         var commands = new List<int>();
-        var robots = new List<int>();
         var curCode = endCode;
         while (curCode != startCode)
         {
