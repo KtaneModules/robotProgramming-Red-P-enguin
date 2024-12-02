@@ -1,17 +1,22 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
+using System.Linq;
 using KModkit;
+using UnityEngine;
 
-public class robotProgramming : MonoBehaviour {
+using Random = UnityEngine.Random;
 
+#pragma warning disable IDE0051 // Remove unused private members
+
+public class robotProgramming : MonoBehaviour
+{
     public KMBombModule module;
     public KMBombInfo bomb;
     public KMAudio bombAudio;
     static int ModuleIdCounter = 1;
     int ModuleId;
     bool moduleSolved;
-    //colorblind
     public KMColorblindMode colorblind;
     bool colorblindActive;
     public TextMesh[] colorblindRobotTexts;
@@ -25,9 +30,9 @@ public class robotProgramming : MonoBehaviour {
     public KMSelectable[] blockButtons;
 
     //Maze
-    string[] maze = new string[9]; //to make my life easier, the coordinates for reading off the maze are in reverse order (y, x)
-    string[] mazeTops = new string[16]
-{
+    private readonly string[] maze = new string[9]; //to make my life easier, the coordinates for reading off the maze are in reverse order (y, x)
+    private static readonly string[] mazeTops = new string[16]
+    {
         "XrXyXgXbX|X...X...X|XXX.X.X.X|X...X.X.X|X.XXXXX.X|X.......X",
         "XrXyXgXbX|X.......X|X.XX.XX.X|X.X...X.X|XXX.X.XXX|X...X...X",
         "XrXyXgXbX|X.......X|XXX.XXX.X|X.X...X.X|X.XXX.XXX|X.......X",
@@ -44,8 +49,8 @@ public class robotProgramming : MonoBehaviour {
         "XrXyXgXbX|X.......X|XX.XXX.XX|X...X...X|X.X.X.X.X|X.X...X.X",
         "XrXyXgXbX|X.X.....X|X.X.XXX.X|X...X...X|X.XXXXX.X|X.X.....X",
         "XrXyXgXbX|X.....X.X|X.XXX.X.X|X.X...X.X|X.X.XXX.X|X.X.....X"
-};
-    string[] mazeBottoms = new string[16]
+    };
+    private static readonly string[] mazeBottoms = new string[16]
     {
         "X.X.XXX.X|X.X.X...X|XXXXXXXXX",
         "X.XXXXX.X|X.......X|XXXXXXXXX",
@@ -70,7 +75,7 @@ public class robotProgramming : MonoBehaviour {
     public SpriteRenderer bottomHalfRenderer;
     int topIndex;
     int bottomIndex;
-    Vector2Int[] goalPositions = new Vector2Int[4] { new Vector2Int(7,0), new Vector2Int(5,0), new Vector2Int(1,0), new Vector2Int(3,0) }; //sorted by color (blue, green, red, yellow)
+    private static readonly Vector2Int[] goalPositions = new Vector2Int[4] { new Vector2Int(7, 0), new Vector2Int(5, 0), new Vector2Int(1, 0), new Vector2Int(3, 0) }; //sorted by color (blue, green, red, yellow)
 
     //Robot Characteristics
     public enum RobotColor
@@ -85,15 +90,15 @@ public class robotProgramming : MonoBehaviour {
     {
         ROB, HAL, R2D2, Fender
     }
-    RobotColor[] robotColors = new RobotColor[4] { RobotColor.Blue, RobotColor.Green, RobotColor.Red, RobotColor.Yellow };
-    Shape[] robotShapes = new Shape[4] { Shape.Triangle, Shape.Square, Shape.Hexagon, Shape.Circle };
-    Type[] robotTypes;
-    Robot[] robots = new Robot[4];
-    Robot[] sortedRobots = new Robot[4];
+    private readonly RobotColor[] robotColors = new RobotColor[4] { RobotColor.Blue, RobotColor.Green, RobotColor.Red, RobotColor.Yellow };
+    private readonly Shape[] robotShapes = new Shape[4] { Shape.Triangle, Shape.Square, Shape.Hexagon, Shape.Circle };
+    private readonly Robot[] robots = new Robot[4];
+    private readonly Robot[] sortedRobots = new Robot[4];
+    private Type[] robotTypes;
 
     //Robot Visuals
     public GameObject[] robotObjects;
-    GameObject[] sortedRobotObjects = new GameObject[4]; //makes moving the visuals WAY easier if sorted by color
+    readonly GameObject[] sortedRobotObjects = new GameObject[4]; //makes moving the visuals WAY easier if sorted by color
     public Material[] robotMaterials;
     public Mesh[] robotMeshes;
 
@@ -102,7 +107,7 @@ public class robotProgramming : MonoBehaviour {
     {
         Up, Right, Down, Left
     }
-    List<string> inputNames = new List<string>();
+    readonly List<string> inputNames = new List<string>();
     //Striking
     bool willStrike;
     bool lastR2D2Behavior;
@@ -113,9 +118,9 @@ public class robotProgramming : MonoBehaviour {
     //Fender
     int serialCharacterIndex;
     int initialCharacterIndex; //Reset
-    string[] placeNames = new string[6] { "1st", "2nd", "3rd", "4th", "5th", "6th" }; //used for logging
+    readonly string[] placeNames = new string[6] { "1st", "2nd", "3rd", "4th", "5th", "6th" }; //used for logging
     //Animation
-    Queue<AnimationRequest> animationQueue = new Queue<AnimationRequest>();
+    readonly Queue<AnimationRequest> animationQueue = new Queue<AnimationRequest>();
     bool currentlyAnimating;
 
     //Showing inputs
@@ -125,12 +130,10 @@ public class robotProgramming : MonoBehaviour {
     int initialColorIndex;
     public Renderer LedRenderer;
     public Material[] unlitColorMaterials;
-    //Stuck Check
-    int robotsStuck;
     //Small Display
     public TextMesh displayText;
     public Sprite[] shapeSprites;
-    Color[] displayColors = new Color[4] { new Color(58/255f, 88/255f, 1), new Color(0, 1, 0), new Color(1, 0, 0), new Color(1, 1, 0) };
+    private static readonly Color[] displayColors = new Color[4] { new Color(58 / 255f, 88 / 255f, 1), new Color(0, 1, 0), new Color(1, 0, 0), new Color(1, 1, 0) };
     public SpriteRenderer[] displayShapeRenderers;
     public GameObject displayShapesObject;
 
@@ -138,11 +141,11 @@ public class robotProgramming : MonoBehaviour {
     {
         ModuleId = ModuleIdCounter++;
 
-        for(int i = 0; i < 4; i++)
+        for (int i = 0; i < 4; i++)
         {
             int dummy = i; //i need this because "i" is changing constantly and i think that makes it not work
-            arrowButtons[dummy].OnInteract += delegate () { arrowButtonPressed((Direction)dummy); return false; };
-            blockButtons[dummy].OnInteract += delegate () { blockButtonPressed((RobotColor)dummy); return false; };
+            arrowButtons[dummy].OnInteract += delegate () { arrowButtonPressed((Direction) dummy); return false; };
+            blockButtons[dummy].OnInteract += delegate () { blockButtonPressed((RobotColor) dummy); return false; };
         }
         startButton.OnInteract += delegate () { handleStart(); return false; };
         resetButton.OnInteract += delegate () { willStrike = false; handleReset(); return false; };
@@ -150,10 +153,10 @@ public class robotProgramming : MonoBehaviour {
         colorblindActive = colorblind.ColorblindModeActive;
     }
 
-    void Start ()
+    void Start()
     {
-        topIndex = Random.Range(0,16);
-        bottomIndex = Random.Range(0,16);
+        topIndex = Random.Range(0, 16);
+        bottomIndex = Random.Range(0, 16);
         string[] topHalf = mazeTops[topIndex].Split('|');
         string[] bottomHalf = mazeBottoms[bottomIndex].Split('|');
         string logMaze = "";
@@ -162,7 +165,7 @@ public class robotProgramming : MonoBehaviour {
         bottomHalfRenderer.sprite = bottomHalfSprites[bottomIndex];
         displayText.text = "[AWAITING INPUT]\n" + (topIndex + 1) + " " + (bottomIndex + 1);
 
-        for(int i = 0; i < 6; i++) //assign top half of the maze
+        for (int i = 0; i < 6; i++) //assign top half of the maze
         {
             maze[i] = topHalf[i];
             logMaze += topHalf[i] + "\n";
@@ -180,13 +183,13 @@ public class robotProgramming : MonoBehaviour {
 
         int caseNumber = 0; //this number increments by 4 if the first rule in the chart applies, by 2 if the second rule applies, and by 1 if the 3rd rule applies
 
-        for(int i = 0; i < 4; i++)
+        for (int i = 0; i < 4; i++)
         {
-            robotObjects[i].GetComponent<Renderer>().material = robotMaterials[(int)robotColors[i]];
-            robotObjects[i].GetComponent<MeshFilter>().mesh = robotMeshes[(int)robotShapes[i]];
+            robotObjects[i].GetComponent<Renderer>().material = robotMaterials[(int) robotColors[i]];
+            robotObjects[i].GetComponent<MeshFilter>().mesh = robotMeshes[(int) robotShapes[i]];
 
-            displayShapeRenderers[i].color = displayColors[(int)robotColors[i]];
-            displayShapeRenderers[i].sprite = shapeSprites[(int)robotShapes[i]];
+            displayShapeRenderers[i].color = displayColors[(int) robotColors[i]];
+            displayShapeRenderers[i].sprite = shapeSprites[(int) robotShapes[i]];
 
             if (robotColors[i] == RobotColor.Yellow && robotShapes[i] == Shape.Hexagon) //second rule
                 caseNumber += 2;
@@ -227,11 +230,11 @@ public class robotProgramming : MonoBehaviour {
 
         //Sorting the robots based on color to make moving them easier
         int[] initialXPositions = new int[4] { 1, 3, 5, 7 };
-        for(int i = 0; i < 4; i++)
+        for (int i = 0; i < 4; i++)
         {
             robots[i] = new Robot(robotColors[i], robotShapes[i], robotTypes[i], initialXPositions[i], 7);
-            sortedRobots[(int)robotColors[i]] = robots[i];
-            sortedRobotObjects[(int)robotColors[i]] = robotObjects[i];
+            sortedRobots[(int) robotColors[i]] = robots[i];
+            sortedRobotObjects[(int) robotColors[i]] = robotObjects[i];
         }
 
         LogMsg("The robots in the initial order are: " + LogRobots(robots[0]) + ", " + LogRobots(robots[1]) + ", " + LogRobots(robots[2]) + ", " + LogRobots(robots[3]) + ".");
@@ -239,6 +242,8 @@ public class robotProgramming : MonoBehaviour {
 
         if (colorblindActive)
             setupColorblind();
+
+        LogMsgSilent(maze.Join("\n"));
     }
 
     //button presses
@@ -249,7 +254,7 @@ public class robotProgramming : MonoBehaviour {
 
         inputNames.Add(direction.ToString());
 
-        int index = (int)notBlockedColors[currentColorIndex];
+        int index = (int) notBlockedColors[currentColorIndex];
         string colorName = notBlockedColors[currentColorIndex].ToString().ToLower();
         string directionName = direction.ToString().ToLower();
         Robot currentRobot = sortedRobots[index];
@@ -263,12 +268,12 @@ public class robotProgramming : MonoBehaviour {
                 outputDirection = direction;
                 break;
             case Type.HAL:
-                outputDirection = (Direction)(((int)direction + 2) % 4);
+                outputDirection = (Direction) (((int) direction + 2) % 4);
                 break;
             case Type.R2D2:
                 if (R2D2actsLikeHAL)
                 {
-                    outputDirection = (Direction)(((int)direction + 2) % 4);
+                    outputDirection = (Direction) (((int) direction + 2) % 4);
                 }
                 else
                 {
@@ -282,9 +287,9 @@ public class robotProgramming : MonoBehaviour {
                 string serialNumber = bomb.GetSerialNumber();
 
                 string serialBorderedCharacter = "";
-                for(int i = 0; i < 6; i++)
+                for (int i = 0; i < 6; i++)
                 {
-                    if(i == serialCharacterIndex)
+                    if (i == serialCharacterIndex)
                     {
                         serialBorderedCharacter += "[" + serialNumber[i] + "]";
                         continue;
@@ -299,7 +304,7 @@ public class robotProgramming : MonoBehaviour {
                 }
                 else
                 {
-                    outputDirection = (Direction)(((int)direction + 2) % 4);
+                    outputDirection = (Direction) (((int) direction + 2) % 4);
                 }
 
                 Debug.LogFormat("[Robot Programming #{0}] The {1} character in the serial number ({2}) is a {3}, so Fender will act like {4} for this turn.", ModuleId, placeNames[serialCharacterIndex], serialBorderedCharacter, isADigit ? "digit" : "letter", isADigit ? "ROB" : "HAL");
@@ -326,33 +331,33 @@ public class robotProgramming : MonoBehaviour {
         LogMsg("The " + colorName + " robot will move " + outputDirection.ToString().ToLower() + ". Its new coordinates are " + (currentRobot.Position.x + 1) + ", " + (9 - currentRobot.Position.y) + ".");
 
         bool crashes = isRobotColliding(currentRobot, !willStrike); //!willStrike makes it only log the first crash
-        if(!willStrike) //prevents extraneous moves from being animated/counted for the most recent behavior, because it'll strike before it gets to the move anyway
+        if (!willStrike) //prevents extraneous moves from being animated/counted for the most recent behavior, because it'll strike before it gets to the move anyway
         {
             animationQueue.Enqueue(new AnimationRequest(index, outputDirection, crashes));
-            if(!crashes)
+            if (!crashes)
             {
                 currentRobot.LastPosition = currentRobot.Position;
                 lastR2D2Behavior = R2D2actsLikeHAL;
                 lastSerialCharacterIndex = serialCharacterIndex;
             }
         }
-        if(crashes)
+        if (crashes)
         {
             willStrike = true;
         }
 
         //shift forward color by one and keep shifting if robot is stuck, completely stopping if all robots are stuck
         bool decidedRobot = false;
-        for(int i = currentColorIndex + 1; i < currentColorIndex + 1 + notBlockedColors.Count; i++)
+        for (int i = currentColorIndex + 1; i < currentColorIndex + 1 + notBlockedColors.Count; i++)
         {
-            if (!isRobotStuck(sortedRobots[(int)notBlockedColors[i % notBlockedColors.Count]]))
+            if (!isRobotStuck(sortedRobots[(int) notBlockedColors[i % notBlockedColors.Count]]))
             {
                 decidedRobot = true;
                 currentColorIndex = i % notBlockedColors.Count;
                 break;
             }
         }
-        if(!decidedRobot)
+        if (!decidedRobot)
         {
             LogMsg("All robots are blocked or stuck, so no more moves can be made.");
             notBlockedColors.Clear(); //this is ok to clear because at that point no moves can be made anyway
@@ -380,7 +385,7 @@ public class robotProgramming : MonoBehaviour {
         }
 
         inputNames.Add("Block " + color.ToString());
-        LogMsg(sortedRobots[(int)color].Type.ToString() + " (" + color.ToString() + ") has been blocked.");
+        LogMsg(sortedRobots[(int) color].Type.ToString() + " (" + color.ToString() + ") has been blocked.");
 
         updateLed();
         updateDisplay();
@@ -389,7 +394,7 @@ public class robotProgramming : MonoBehaviour {
     //handle visuals
     void updateLed()
     {
-        if(notBlockedColors.Count <= 0 || currentColorIndex == 4)
+        if (notBlockedColors.Count <= 0 || currentColorIndex == 4)
         {
             LedRenderer.material = unlitColorMaterials[4];
 
@@ -399,7 +404,7 @@ public class robotProgramming : MonoBehaviour {
             return;
         }
 
-        LedRenderer.material = unlitColorMaterials[(int)notBlockedColors[currentColorIndex]];
+        LedRenderer.material = unlitColorMaterials[(int) notBlockedColors[currentColorIndex]];
 
         if (colorblindActive)
             setColorblindText(colorblindLEDText, notBlockedColors[currentColorIndex]);
@@ -412,10 +417,10 @@ public class robotProgramming : MonoBehaviour {
         displayText.text = "";
         for (int i = Mathf.Max(0, inputNames.Count - 3); i < inputNames.Count; i++)
         {
-            if(inputNames[i][0] == 'B') //If it's a block action
+            if (inputNames[i][0] == 'B') //If it's a block action
             {
                 string colorHex = "";
-                switch ( inputNames[i].Split(' ')[1] )
+                switch (inputNames[i].Split(' ')[1])
                 {
                     case "Blue":
                         colorHex = "#3A58FF";
@@ -460,11 +465,11 @@ public class robotProgramming : MonoBehaviour {
 
     void resetVariables(bool struck)
     {
-        if(!struck)
+        if (!struck)
             LogMsg("Reset.");
         Debug.LogFormat("<Robot Programming #{0} R2D2 now acts like {1}.", ModuleId, initialR2D2Behavior ? "HAL" : "ROB");
         Debug.LogFormat("<Robot Programming #{0} Fender now starts at the {1} character.", ModuleId, placeNames[initialCharacterIndex]);
-        Debug.LogFormat("<Robot Programming #{0} The LED is now {1}.", ModuleId, ((RobotColor)initialColorIndex).ToString());
+        Debug.LogFormat("<Robot Programming #{0} The LED is now {1}.", ModuleId, ((RobotColor) initialColorIndex).ToString());
         inputNames.Clear();
 
         //reset everything to what it initially was
@@ -477,10 +482,10 @@ public class robotProgramming : MonoBehaviour {
         currentColorIndex = initialColorIndex;
         updateLed();
 
-        for(int i = 0; i < 4; i++)
+        for (int i = 0; i < 4; i++)
         {
             sortedRobots[i].Position = sortedRobots[i].InitialPosition;
-            Debug.LogFormat("<Robot Programming #{0}> {1} ({2}) is now at {3}, {4}.", ModuleId, sortedRobots[i].Type.ToString(), ((RobotColor)i).ToString(), sortedRobots[i].Position.x + 1, sortedRobots[i].Position.y + 1);
+            Debug.LogFormat("<Robot Programming #{0}> {1} ({2}) is now at {3}, {4}.", ModuleId, sortedRobots[i].Type.ToString(), ((RobotColor) i).ToString(), sortedRobots[i].Position.x + 1, sortedRobots[i].Position.y + 1);
         }
 
         displayText.text = (struck ? "[ERROR]" : "[RESET]") + "\n R2D2: " + (R2D2actsLikeHAL ? "HAL" : "ROB") + "\nFender: " + placeNames[serialCharacterIndex] + "\n" + (topIndex + 1) + " " + (bottomIndex + 1) + "\n";
@@ -495,10 +500,10 @@ public class robotProgramming : MonoBehaviour {
         bombAudio.PlaySoundAtTransform("strike", transform);
 
         //set everything to how it would be when the robot strikes
-        initialColorIndex = (int)ledColor;
+        initialColorIndex = (int) ledColor;
         initialR2D2Behavior = lastR2D2Behavior;
         initialCharacterIndex = lastSerialCharacterIndex;
-        for(int i = 0; i < 4; i++)
+        for (int i = 0; i < 4; i++)
         {
             sortedRobots[i].InitialPosition = sortedRobots[i].LastPosition;
         }
@@ -522,17 +527,17 @@ public class robotProgramming : MonoBehaviour {
     {
         if (robot.Position.x < 0 || robot.Position.x > 8 || robot.Position.y < 0 || robot.Position.y > 8) //prevents out of bounds (which causes wall checks to error out)
         {
-            if(logCrashes)
+            if (logCrashes)
                 LogMsg(robot.Type.ToString() + " (" + robot.Color.ToString() + ") is moving out of bounds. This move will cause the program to crash!");
             return true;
         }
 
-        for(int i = 0; i < 4; i++)
+        for (int i = 0; i < 4; i++)
         {
             if (sortedRobots[i].Position == robot.Position && sortedRobots[i] != robot) //if robot is on top of another robot
             {
                 if (logCrashes)
-                    LogMsg(robot.Type.ToString() + " (" + robot.Color.ToString() + ") is colliding with the " + ((RobotColor)i).ToString() + " robot. This move will cause the program to crash!");
+                    LogMsg(robot.Type.ToString() + " (" + robot.Color.ToString() + ") is colliding with the " + ((RobotColor) i).ToString() + " robot. This move will cause the program to crash!");
                 return true;
             }
         }
@@ -548,10 +553,10 @@ public class robotProgramming : MonoBehaviour {
 
     bool isRobotStuck(Robot robot)
     {
-        Vector2Int[] directions = new Vector2Int[4] { new Vector2Int(-1, 0), new Vector2Int(0, 1), new Vector2Int(1, 0), new Vector2Int(0, -1)};
-        for(int i = 0; i < 4; i++)
+        Vector2Int[] directions = new Vector2Int[4] { new Vector2Int(-1, 0), new Vector2Int(0, 1), new Vector2Int(1, 0), new Vector2Int(0, -1) };
+        for (int i = 0; i < 4; i++)
         {
-            if(!isRobotColliding(new Robot(robot.Position + directions[i]), false))
+            if (!isRobotColliding(new Robot(robot.Position + directions[i]), false))
                 return false;
         }
         LogMsg(robot.Type.ToString() + " (" + robot.Color.ToString() + ") cannot move! Skipping its turn.");
@@ -560,7 +565,7 @@ public class robotProgramming : MonoBehaviour {
 
     bool isModuleSolved()
     {
-        for(int i = 0; i < 4; i++)
+        for (int i = 0; i < 4; i++)
         {
             if (sortedRobots[i].Position != goalPositions[i])
                 return false;
@@ -573,11 +578,10 @@ public class robotProgramming : MonoBehaviour {
     {
         currentlyAnimating = true;
         int animationsDone = 0;
-        AnimationRequest request = new AnimationRequest();
 
         while (animationQueue.Count > 0)
         {
-            request = animationQueue.Dequeue();
+            var request = animationQueue.Dequeue();
             GameObject robotObject = sortedRobotObjects[request.RobotIndex];
             Vector3 startPosition = robotObject.transform.localPosition;
             Vector3 endPosition = new Vector3(Mathf.Lerp(-0.07345f, 0.00635f, sortedRobots[request.RobotIndex].Position.x / 8f), 0f, Mathf.Lerp(0.04f, -0.04f, sortedRobots[request.RobotIndex].Position.y / 8f));
@@ -607,7 +611,7 @@ public class robotProgramming : MonoBehaviour {
                     robotObject.transform.localPosition = Vector3.Lerp(startPosition, endPosition, t);
                     yield return new WaitForSeconds(.01f);
                 }
-                handleStrike((RobotColor)request.RobotIndex);
+                handleStrike((RobotColor) request.RobotIndex);
                 while (t > 0)
                 {
                     t -= .05f;
@@ -628,7 +632,7 @@ public class robotProgramming : MonoBehaviour {
             animationsDone++;
         }
 
-        if(isModuleSolved())
+        if (isModuleSolved())
         {
             handleSolve();
         }
@@ -645,11 +649,11 @@ public class robotProgramming : MonoBehaviour {
     //colorblind
     void setupColorblind()
     {
-        for(int i = 0; i < 4; i++)
+        for (int i = 0; i < 4; i++)
         {
             setColorblindText(colorblindRobotTexts[i], robotColors[i]);
             if (robotShapes[i] == Shape.Triangle)
-                colorblindRobotTexts[i].transform.localPosition = new Vector3( 0f, -0.00192f, -0.0043f );
+                colorblindRobotTexts[i].transform.localPosition = new Vector3(0f, -0.00192f, -0.0043f);
         }
         setColorblindText(colorblindLEDText, notBlockedColors[currentColorIndex]);
         colorblindOtherText.SetActive(true);
@@ -694,20 +698,16 @@ public class robotProgramming : MonoBehaviour {
     {
         Up, Right, Down, Left, Block, Reset, Start, Colorblind
     }
-    bool executingCommands;
-    public string TwitchHelpMessage = "\"!{0} left/right/up/down/l/r/u/d\" to press that button. \"!{0} block red/yellow/green/blue/r/y/g/b\" to block that color. \"!{0} reset\" to reset the program. \"!{0} start\" to start the program. \"!{0} colorblind\" to toggle colorblind.";
+    private readonly string TwitchHelpMessage = @"""!{0} left/right/up/down/l/r/u/d"" to press that button. ""!{0} block red/yellow/green/blue/r/y/g/b"" to block that color. ""!{0} reset"" to reset the program. ""!{0} start"" to start the program. ""!{0} colorblind"" to toggle colorblind.";
     IEnumerator ProcessTwitchCommand(string cmd)
     {
-        var commands = cmd.ToLowerInvariant().Split(new[] { ' ' });
-
-        while (executingCommands) { yield return new WaitForSeconds(1f); }
-        print(executingCommands + " executing");
+        var commands = cmd.ToLowerInvariant().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
         Queue<Input> inputs = new Queue<Input>();
         Queue<RobotColor> blocks = new Queue<RobotColor>();
-        for(int i = 0; i < commands.Length; i++)
+        for (int i = 0; i < commands.Length; i++)
         {
-            switch(commands[i])
+            switch (commands[i])
             {
                 case "up":
                 case "u":
@@ -736,11 +736,10 @@ public class robotProgramming : MonoBehaviour {
                 case "block":
                     inputs.Enqueue(Input.Block);
 
-                    if(i + 1 >= commands.Length)
+                    if (i + 1 >= commands.Length)
                     {
-                        yield return ("sendtochaterror \"block\" command not followed by a color.");
-                        inputs.Clear();
-                        i = commands.Length; //exit out of for loop
+                        yield return @"sendtochaterror ""block"" command not followed by a color.";
+                        yield break;
                     }
                     switch (commands[i + 1])
                     {
@@ -761,49 +760,40 @@ public class robotProgramming : MonoBehaviour {
                             blocks.Enqueue(RobotColor.Yellow);
                             break;
                         default:
-                            yield return ("sendtochaterror \"block\" command not followed by a color.");
-                            inputs.Clear();
-                            i = commands.Length; //exit out of for loop
-                            break;
+                            yield return @"sendtochaterror ""block"" command not followed by a color.";
+                            yield break;
                     }
 
                     i++;
                     break;
                 case "colorblind":
+                    yield return null;
                     toggleColorblind();
                     break;
-                case "": //prevent null commands from breaking things. this is sloppy but thog dont caare
-                    break;
                 default:
-                    yield return ("sendtochaterror \"" + commands[i] + "\" is an improper command.");
-                    inputs.Clear();
-                    i = commands.Length; //exit out of for loop
-                    break;
+                    yield return $@"sendtochaterror ""{commands[i]}"" is an improper command.";
+                    yield break;
             }
         }
 
-        if(inputs.Count > 0)
+        if (inputs.Count > 0)
         {
-            while (currentlyAnimating)
-                yield return true;
-            
-            if(!moduleSolved)
-                StartCoroutine(executeCommands(inputs, blocks));
-
             yield return null;
-        }
 
-        yield break;
+            while (currentlyAnimating)
+                yield return "trycancel";
+
+            if (!moduleSolved)
+                yield return executeCommands(inputs, blocks);
+        }
     }
 
     IEnumerator executeCommands(Queue<Input> inputs, Queue<RobotColor> blockedColors)
     {
-        executingCommands = true;
-        while(inputs.Count > 0)
+        while (inputs.Count > 0)
         {
             Input input = inputs.Dequeue();
-            print("Dequeued input: " + input.ToString());
-            switch(input)
+            switch (input)
             {
                 case Input.Up:
                     arrowButtons[0].OnInteract();
@@ -825,16 +815,12 @@ public class robotProgramming : MonoBehaviour {
                     break;
                 case Input.Block:
                     RobotColor blockedColor = blockedColors.Dequeue();
-                    blockButtons[(int)blockedColor].OnInteract();
+                    blockButtons[(int) blockedColor].OnInteract();
                     break;
             }
 
             yield return new WaitForSeconds(.1f);
         }
-
-        print("I'm done");
-        executingCommands = false;
-        yield break;
     }
 
     //logging and other functions
@@ -848,6 +834,196 @@ public class robotProgramming : MonoBehaviour {
     }
     string LogRobots(Robot robot)
     {
-        return (robot.Color.ToString() + " " + robot.Shape.ToString());
+        return $"{robot.Color} {robot.Shape}";
+    }
+
+    // Twitch Plays auto-solver
+    IEnumerator TwitchHandleForcedSolve()
+    {
+        while (currentlyAnimating)
+            yield return true;
+
+        if (moduleSolved)
+            yield break;
+
+        resetButton.OnInteract();
+        yield return new WaitForSeconds(.1f);
+
+        // Generate the solution. See FindPath for full explanation.
+        var solution = FindPath(sortedRobots.Select(robot => robot.InitialPosition.y * 9 + robot.InitialPosition.x).ToArray());
+
+        // Variables to keep track of R2D2 and Fender
+        var r2d2IsRob = true;
+        var sn = bomb.GetSerialNumber();
+        var fenderMovement = 0;
+
+        // In the majority of cases, we will just execute the commands from start to finish.
+        // However, in some cases, a robot’s movement is restricted by the presence of other robots.
+        // In such a case, the module will skip that robot’s color, so we have to skip it too.
+        // Therefore, at each iteration, we find the earliest command for the robot that is currently waiting for input.
+        while (solution.Count > 0)
+        {
+            // FindPath returns values that consist of the robot color (lowest two bits) and the command (rest of the bits).
+            // Find index of earliest command of the desired robot color (lowest two bits), then extract the command (by shifting the robot color out).
+            var commandIx = solution.FindIndex(v => (v & 0x3) == (int) notBlockedColors[currentColorIndex]);
+            var command = solution[commandIx] >> 2;
+
+            KMSelectable btn;
+            if (command == 4)
+                btn = blockButtons[(int) notBlockedColors[currentColorIndex]];
+            else
+            {
+                // Determine whether we need to press the correct or the opposite button
+                var robotPersonality = sortedRobots[(int) notBlockedColors[currentColorIndex]].Type;
+                var correctButton = robotPersonality == Type.ROB;
+                switch (robotPersonality)
+                {
+                    case Type.R2D2:
+                        correctButton = r2d2IsRob;
+                        r2d2IsRob = !r2d2IsRob;
+                        break;
+                    case Type.Fender:
+                        correctButton = char.IsDigit(sn[fenderMovement]);
+                        fenderMovement = (fenderMovement + 1) % 6;
+                        break;
+                }
+
+                // Press the appropriate button
+                btn = arrowButtons[correctButton ? command : (command + 2) % 4];
+            }
+            btn.OnInteract();
+            yield return new WaitForSeconds(.1f);
+            solution.RemoveAt(commandIx);
+        }
+
+        startButton.OnInteract();
+        yield return new WaitForSeconds(.1f);
+
+        while (!moduleSolved)
+            yield return true;
+    }
+
+    // Takes a list of robot starting positions (in the order B G R Y) and returns a possible solution that will navigate them all to their goal.
+    // The returned integers consist of a robot color (lowest two bits) and a command (rest). Commands are Up, Right, Down, Left, or Block.
+    private List<int> FindPath(int[] startPositions)
+    {
+        // Throughout this algorithm:
+        //  • The robots are always considered to be in the order B G R Y. Robot #0 is always the blue one, etc.
+        //  • The module variable ‘maze’ is re-used to determine the maze geometry and the positions of the goals.
+        //  • Coordinates (positions in the 9×9 maze) are stored as values 0–80, or equivalently, as x + 9*y.
+        //    Thus, X and Y coordinates are extracted from a coordinate C as X = C % 9 and Y = C / 9.
+        //  • A single integer, called a “code”, is used to represent the entire game state:
+        //      YRGBNNYYYYYYYRRRRRRRGGGGGGGBBBBBBB
+        //      └─┬┘└┤└──┬──┘└──┬──┘└──┬──┘└──┬──┘
+        //        │  │ Y pos  R pos  G pos  B pos
+        //        │  │ (7 b)  (7 b)  (7 b)  (7 b)
+        //        │  └─▶ which robot’s turn it is (2 bits)
+        //        └─▶ which robots have already been blocked (4 bits)
+        //    Since such a code uses more than 32 bits, we use a ulong to store it.
+
+        // For each of the five possible actions (up, right, down, left, block), this is the amount by which a robot’s coordinate changes.
+        // Ordinarily this would be incorrect when at the edge of the maze, but in our case, the maze is entirely cordoned off with walls
+        // and the top row contains the goals, so no robot will move off the edge at any point.
+        var ds = new[] { -9, 1, 9, -1, 0 };
+
+        // Calculates the starting code. Since only the start positions are placed, everything else is 0: it will be robot #0’s turn and no robots are blocked.
+        ulong startCode = (ulong) (startPositions[0] | (startPositions[1] << 7) | (startPositions[2] << 14) | (startPositions[3] << 21));
+
+        // START OF BREADTH-FIRST SEARCH ALGORITHM
+
+        // Queue to contain all the game states (“codes”) yet to be examined. Start with only the starting code;
+        // then each iteration will add all codes that are reachable by one move, etc. until a code is found that solves the module.
+        var q = new Queue<ulong>();
+        q.Enqueue(startCode);
+
+        // For each code we discovered, remember which code it was generated from and which command was executed to get there.
+        var cameFrom = new Dictionary<ulong, ulong>();
+        var commandsFrom = new Dictionary<ulong, int>();
+
+        // This variable remembers the code of the goal state when we find it.
+        // The value assigned here is never used unless there’s a bug, in which case this value guarantees an exception (as opposed to erratic behaviour)
+        ulong endCode = ulong.MaxValue;
+
+        while (q.Count > 0)
+        {
+            // LOOP ITERATION:
+            // Look at a code from the queue, generate all codes reachable by one command and put them in the queue
+
+            // Step 1: take a code from the queue and calculate which robot’s turn it is and where it is
+            var code = q.Dequeue();
+            var curRobot = (int) ((code >> 28) & 0x3);
+            var curCoordinate = (int) ((code >> (7 * curRobot)) & 0x7F);
+
+            // For each possible command...
+            foreach (var d in ds)
+            {
+                // Do a “block” command (d = 0) IF AND ONLY IF the current robot is on its goal position
+                if ((d == 0) != (maze[curCoordinate / 9][curCoordinate % 9] == "bgry"[curRobot]))
+                    continue;
+
+                var newCoordinate = curCoordinate + d;
+                // Only consider this command if it takes the robot into an empty space or its own goal (i.e., not a wall and not another robot’s goal)
+                if (maze[newCoordinate / 9][newCoordinate % 9] != '.' && maze[newCoordinate / 9][newCoordinate % 9] != "bgry"[curRobot])
+                    continue;
+                // Only consider this command if it doesn’t cause the robot to crash into another robot
+                if (Enumerable.Range(0, 4).Any(otherRobot => otherRobot != curRobot && (int) ((code >> (7 * otherRobot)) & 0x7F) == newCoordinate))
+                    continue;
+
+                // Calculate whose turn it is next (skip robots that are already blocked)
+                var newRobot = (curRobot + 1) % 4;
+                while ((code & (1ul << (30 + newRobot))) != 0)
+                    newRobot = (newRobot + 1) % 4;
+
+                // Calculate the new code by:
+                var newCode =
+                    // — changing the current robot’s position
+                    (((code & ~(0x7Ful << (7 * curRobot))) | ((ulong) newCoordinate << (7 * curRobot))) & 0xFFFFFFFul) |
+                    // — updating whose turn it is
+                    ((ulong) newRobot << 28) |
+                    // — keeping the information on which robots are blocked
+                    ((code >> 30) << 30);
+                if (d == 0)
+                    // — blocking the current robot if that’s what we’re doing
+                    newCode |= 1ul << (30 + curRobot);
+
+                // Only consider this command if it takes us to a new code we haven’t already seen
+                if (!cameFrom.ContainsKey(newCode))
+                {
+                    cameFrom[newCode] = code;
+                    commandsFrom[newCode] = Array.IndexOf(ds, d);
+
+                    // If every robot is in the top row (Y coordinate = 0), consider this the solved state
+                    if (Enumerable.Range(0, 4).All(robotIx => ((newCode >> (7 * robotIx)) & 0x7F) / 9 == 0))
+                    {
+                        endCode = newCode;
+                        goto found;
+                    }
+
+                    // Otherwise, remember this new code in the queue and come back to it later to explore further
+                    q.Enqueue(newCode);
+                }
+            }
+        }
+
+        found:
+        // We found a solution! At this point, we know:
+        //  • what the final code is (‘endCode’)
+        //  • what earlier code each code was generated from and which command was executed to get there
+        // So we start with the final code and reconstruct how we got there by iteratively tracing it back to the starting position (‘startCode’).
+
+        var commands = new List<int>();
+        var curCode = endCode;
+        while (curCode != startCode)
+        {
+            var cmd = commandsFrom[curCode];
+            curCode = cameFrom[curCode];
+
+            // Add an integer consisting of the robot (bottom two bits) and the command (rest)
+            commands.Add((cmd << 2) | ((int) (curCode >> 28) & 0x3));
+        }
+
+        // Since we went from the final position to the starting position, the commands are in reverse order, so reverse them back.
+        commands.Reverse();
+        return commands;
     }
 }

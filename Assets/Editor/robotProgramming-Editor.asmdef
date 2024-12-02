@@ -1,0 +1,10 @@
+{
+  "name": "robotProgramming-Editor",
+  "references": [
+    "robotProgramming"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": []
+}
